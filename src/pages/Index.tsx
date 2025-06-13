@@ -3,12 +3,13 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Euro, Users, FileText, Hash } from "lucide-react";
+import { Euro, Users, FileText, Hash, Settings } from "lucide-react";
 import { Dashboard } from "@/components/Dashboard";
 import { ClientsManagement } from "@/components/ClientsManagement";
 import { ProductsManagement } from "@/components/ProductsManagement";
 import { InvoicingModule } from "@/components/InvoicingModule";
 import { ReportsModule } from "@/components/ReportsModule";
+import { IntegrationsModule } from "@/components/IntegrationsModule";
 import { Header } from "@/components/Header";
 
 const Index = () => {
@@ -29,7 +30,7 @@ const Index = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Hash className="w-4 h-4" />
               Dashboard
@@ -49,6 +50,10 @@ const Index = () => {
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Relatórios
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Integrações
             </TabsTrigger>
           </TabsList>
 
@@ -70,6 +75,10 @@ const Index = () => {
 
           <TabsContent value="reports" className="space-y-6">
             <ReportsModule />
+          </TabsContent>
+
+          <TabsContent value="integrations" className="space-y-6">
+            <IntegrationsModule />
           </TabsContent>
         </Tabs>
       </div>

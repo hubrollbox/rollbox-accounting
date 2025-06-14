@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +24,7 @@ export const AuditTrail: React.FC = () => {
   const { data: auditLogs, isLoading, error } = useSecureQuery<AuditLog[]>({
     queryKey: ['audit-logs'],
     table: 'audit_logs',
-    select: `
+    selectFields: `
       id,
       user_id,
       action,

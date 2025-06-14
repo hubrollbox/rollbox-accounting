@@ -1,5 +1,5 @@
 
-import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -11,49 +11,53 @@ interface PaginationOptions {
   pageSize?: number;
 }
 
-interface SecureQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn'> {
-  queryKey: QueryKey;
+export interface SecureQueryOptions<T> {
+  queryKey: any;
   table: TableName;
   selectFields?: string;
   filters?: Record<string, any>;
   pagination?: PaginationOptions;
   requireCompanyAccess?: boolean;
+  staleTime?: number;
+  retry?: (failureCount: number, error: any) => boolean;
+  enabled?: boolean;
+  onSuccess?: (data: T) => void;
+  onError?: (err: Error) => void;
 }
 
-export const useSecureQuery = <T = any>({
+export function useSecureQuery<T = any>({
   queryKey,
   table,
   selectFields = '*',
   filters = {},
   pagination,
   requireCompanyAccess = true,
-  ...options
-}: SecureQueryOptions<T>) => {
+  staleTime = 5 * 60 * 1000,
+  retry,
+  enabled = true,
+  onSuccess,
+  onError,
+}: SecureQueryOptions<T>) {
   return useQuery<T, Error>({
-    queryKey: queryKey,
+    queryKey,
     queryFn: async (): Promise<T> => {
-      // Verificar autenticação e autorização
       const session = await authService.getSecureSession();
       if (!session) {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
-      // Construir query base
       let query = supabase.from(table).select(selectFields);
 
-      // Filtro automático por company_id
       if (requireCompanyAccess && session.company_id) {
         query = query.eq('company_id', session.company_id);
       }
 
-      // Filtros adicionais
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           query = query.eq(key, value);
         }
       });
 
-      // Paginação
       if (pagination) {
         const { page = 1, pageSize = 50 } = pagination;
         const from = (page - 1) * pageSize;
@@ -61,7 +65,6 @@ export const useSecureQuery = <T = any>({
         query = query.range(from, to);
       }
 
-      // Executar query
       const { data, error } = await query;
 
       if (error) {
@@ -71,18 +74,20 @@ export const useSecureQuery = <T = any>({
 
       return data as T;
     },
-    // Cache e refetch
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    // cacheTime removido pois não existe mais nessa versão
-    retry: (failureCount, error) => {
-      if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    ...options,
+    staleTime,
+    retry: retry
+      ? retry
+      : (failureCount, error) => {
+          if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
+            return false;
+          }
+          return failureCount < 3;
+        },
+    enabled,
+    onSuccess,
+    onError,
   });
-};
+}
 
 // Placeholder para mutation segura se necessário
 export const useSecureMutation = () => {

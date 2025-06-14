@@ -2,12 +2,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Settings, Shield, LogOut, FileText } from "lucide-react";
+import { User, Settings, Shield, LogOut, FileText, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsModule } from "@/components/ReportsModule";
+import { AuditTrail } from "@/components/AuditTrail";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -23,6 +24,10 @@ const Profile = () => {
     navigate("/auth");
   };
 
+  const handleBackToDashboard = () => {
+    navigate("/");
+  };
+
   const profileStats = [
     { label: "Faturas Emitidas", value: "89", color: "text-blue-600" },
     { label: "Clientes Ativos", value: "23", color: "text-green-600" },
@@ -33,13 +38,26 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Perfil e Configurações
-          </h1>
-          <p className="text-muted-foreground">
-            Gerir informações pessoais, configurações e relatórios
-          </p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-4 mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBackToDashboard}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar ao Dashboard
+              </Button>
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Perfil e Configurações
+            </h1>
+            <p className="text-muted-foreground">
+              Gerir informações pessoais, configurações e relatórios
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
@@ -135,21 +153,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações de Segurança</CardTitle>
-                <CardDescription>
-                  Gestão de permissões e auditoria
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-20 text-muted-foreground">
-                  <Shield className="w-12 h-12 mx-auto mb-4" />
-                  <p>Módulo de Segurança</p>
-                  <p className="text-sm">Configurações avançadas de segurança</p>
-                </div>
-              </CardContent>
-            </Card>
+            <AuditTrail />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,5 +1,5 @@
 
-import { supabase } from './supabaseClient';
+import { supabase } from "@/integrations/supabase/client";
 
 export const getTenantBucket = (tenantId: string) => {
   return `tenant-${tenantId}-documents`;

@@ -10,20 +10,29 @@ export function SidebarTriggerMobile() {
   const elRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && elRef.current) {
-      window.__lovableSidebarTrigger__ = () => {
-        elRef.current?.click();
-      };
-      // Listener para evento customizado
-      const handler = () => elRef.current?.click();
-      window.addEventListener("openSidebarMobile", handler);
-      return () => {
-        window.removeEventListener("openSidebarMobile", handler);
-        // Clean up para evitar problemas de memo vazando
-        delete window.__lovableSidebarTrigger__;
-      };
-    }
-  }, []);
+    // Protege para ambientes SSR/strict mode
+    if (typeof window === "undefined" || !elRef.current) return;
+
+    const triggerFn = () => {
+      elRef.current?.click();
+    };
+    window.__lovableSidebarTrigger__ = triggerFn;
+
+    // Listener para evento customizado
+    const handler = () => {
+      elRef.current?.click();
+    };
+    window.addEventListener("openSidebarMobile", handler);
+
+    // Log para debug
+    console.log("[SidebarTriggerMobile] registrado!");
+
+    return () => {
+      window.removeEventListener("openSidebarMobile", handler);
+      delete window.__lovableSidebarTrigger__;
+      console.log("[SidebarTriggerMobile] desmontado e listeners limpos");
+    };
+  }, [elRef]);
 
   return (
     <span
@@ -31,6 +40,8 @@ export function SidebarTriggerMobile() {
       id="trigger-sidebar-mobile"
       aria-hidden="true"
       ref={elRef}
+      // Log em render apenas para garantir que monta corretamente
+      data-debug="sidebar-trigger-mobile"
     >
       <SidebarTrigger style={{ display: "none" }} />
     </span>

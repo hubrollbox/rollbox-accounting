@@ -1,4 +1,3 @@
-
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,8 +41,8 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
-      // Evita inferência: usa "as any" no parâmetro do .from()
-      let query = supabase.from<any>(table as any).select(selectFields);
+      // Fix: Avoid type arg, just cast to any
+      let query = (supabase.from(table as any) as any).select(selectFields);
 
       if (requireCompanyAccess && session.company_id) {
         query = query.eq('company_id', session.company_id);

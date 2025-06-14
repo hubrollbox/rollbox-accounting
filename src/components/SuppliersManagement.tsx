@@ -7,9 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader as DialogModalHeader,
+  DialogTitle as DialogModalTitle,
+  DialogDescription as DialogModalDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export const SuppliersManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [open, setOpen] = useState(false);
 
   // Mock data - será substituído por dados reais do Supabase
   const suppliers = [
@@ -24,6 +34,37 @@ export const SuppliersManagement = () => {
     },
   ];
 
+  // Estado para novo fornecedor
+  const [newSupplier, setNewSupplier] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    tax_number: "",
+    city: "",
+  });
+
+  // Apenas exibe a UI, não salva ainda
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewSupplier({
+      ...newSupplier,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleCreateSupplier = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aqui será adicionada integração com Supabase futuramente
+    setOpen(false);
+    setNewSupplier({
+      name: "",
+      email: "",
+      phone: "",
+      tax_number: "",
+      city: "",
+    });
+    // Exibe toast se desejar!
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -33,10 +74,75 @@ export const SuppliersManagement = () => {
             Gerir informações dos fornecedores da empresa
           </p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Fornecedor
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Fornecedor
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogModalHeader>
+              <DialogModalTitle>Novo Fornecedor</DialogModalTitle>
+              <DialogModalDescription>
+                Preencha os dados para registrar um novo fornecedor.
+              </DialogModalDescription>
+            </DialogModalHeader>
+            <form onSubmit={handleCreateSupplier} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  value={newSupplier.name}
+                  onChange={handleInputChange}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={newSupplier.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Telefone</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={newSupplier.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="tax_number">NIF</Label>
+                <Input
+                  id="tax_number"
+                  name="tax_number"
+                  value={newSupplier.tax_number}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={newSupplier.city}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="submit">Salvar</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>

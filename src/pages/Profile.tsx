@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsModule } from "@/components/ReportsModule";
 import { AuditTrail } from "@/components/AuditTrail";
+import { IntegrationsModule } from "@/components/IntegrationsModule";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -143,10 +143,13 @@ const Profile = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-20 text-muted-foreground">
+                <div className="mb-10 text-center py-6 text-muted-foreground">
                   <Settings className="w-12 h-12 mx-auto mb-4" />
                   <p>Módulo de Configurações</p>
                   <p className="text-sm">Em desenvolvimento</p>
+                </div>
+                <div>
+                  <IntegrationsModule />
                 </div>
               </CardContent>
             </Card>

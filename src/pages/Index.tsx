@@ -1,4 +1,3 @@
-
 declare global {
   interface Window {
     __lovableSidebarTrigger__?: () => void;
@@ -87,9 +86,10 @@ const Index = () => {
                 <AccountingModule />
               </TabsContent>
 
-              <TabsContent value="integrations" className="space-y-6">
+              {/* Integrações REMOVIDO do dashboard - agora aparece nas Configurações do perfil */}
+              {/* <TabsContent value="integrations" className="space-y-6">
                 <IntegrationsModule />
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </main>
         </div>

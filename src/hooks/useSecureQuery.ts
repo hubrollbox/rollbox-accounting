@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -11,18 +11,14 @@ interface PaginationOptions {
   pageSize?: number;
 }
 
-export interface SecureQueryOptions<T> {
-  queryKey: any;
+export interface SecureQueryOptions<T>
+  extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn' | 'queryKey'> {
+  queryKey: QueryKey;
   table: TableName;
   selectFields?: string;
   filters?: Record<string, any>;
   pagination?: PaginationOptions;
   requireCompanyAccess?: boolean;
-  staleTime?: number;
-  retry?: (failureCount: number, error: any) => boolean;
-  enabled?: boolean;
-  onSuccess?: (data: T) => void;
-  onError?: (err: Error) => void;
 }
 
 export function useSecureQuery<T = any>({
@@ -32,11 +28,7 @@ export function useSecureQuery<T = any>({
   filters = {},
   pagination,
   requireCompanyAccess = true,
-  staleTime = 5 * 60 * 1000,
-  retry,
-  enabled = true,
-  onSuccess,
-  onError,
+  ...options
 }: SecureQueryOptions<T>) {
   return useQuery<T, Error>({
     queryKey,
@@ -74,18 +66,14 @@ export function useSecureQuery<T = any>({
 
       return data as T;
     },
-    staleTime,
-    retry: retry
-      ? retry
-      : (failureCount, error) => {
-          if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
-            return false;
-          }
-          return failureCount < 3;
-        },
-    enabled,
-    onSuccess,
-    onError,
+    staleTime: 5 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    ...options,
   });
 }
 

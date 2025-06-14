@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,7 @@ interface AuditLog {
 }
 
 export const AuditTrail: React.FC = () => {
-  const { data: auditLogs, isLoading, error } = useSecureQuery<AuditLog[]>({
+  const { data, isLoading, error } = useSecureQuery<AuditLog[]>({
     queryKey: ['audit-logs'],
     table: 'audit_logs',
     selectFields: `
@@ -92,6 +93,8 @@ export const AuditTrail: React.FC = () => {
     );
   }
 
+  const auditLogArray: AuditLog[] = Array.isArray(data) ? data : [];
+
   return (
     <Card>
       <CardHeader>
@@ -104,7 +107,7 @@ export const AuditTrail: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!auditLogs || auditLogs.length === 0 ? (
+        {auditLogArray.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Shield className="w-12 h-12 mx-auto mb-4" />
             <p>Nenhum registro de auditoria encontrado</p>
@@ -121,7 +124,7 @@ export const AuditTrail: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {auditLogs.map((log) => (
+              {auditLogArray.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">

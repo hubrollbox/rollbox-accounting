@@ -1,5 +1,7 @@
-import { useState } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +11,58 @@ import { Euro, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [nif, setNif] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const inactivityTimeoutRef = useRef<any>(null);
+
+  // Session timeout and automatic signout
+  useEffect(() => {
+    const resetInactivityTimeout = () => {
+      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+      inactivityTimeoutRef.current = setTimeout(() => {
+        signOut();
+        toast({
+          title: "Sessão terminada por inatividade",
+          description: "Por segurança, foi efetuado logout automático após 30 minutos sem atividade.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      }, SESSION_TIMEOUT);
+    };
+
+    const activityEvents = ["mousemove", "keydown", "click"];
+    activityEvents.forEach((event) => window.addEventListener(event, resetInactivityTimeout));
+    resetInactivityTimeout();
+
+    return () => {
+      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+      activityEvents.forEach((event) => window.removeEventListener(event, resetInactivityTimeout));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signOut, toast, navigate]);
+
+  // Helper to sanitize all fields before sending to backend
+  const sanitize = (value: string) => {
+    return DOMPurify.sanitize(value.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const cleanedEmail = sanitize(email);
+    const cleanedPassword = sanitize(password);
+
+    const { error } = await signIn(cleanedEmail, cleanedPassword);
 
     if (error) {
       toast({
@@ -49,18 +88,26 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Verifica NIF (pode ajustar validação para formato se quiser)
-    if (!nif || nif.length < 9) {
+    // Sanitize all fields
+    const cleanedEmail = sanitize(email);
+    const cleanedPassword = sanitize(password);
+    const cleanedName = sanitize(name);
+    const cleanedNif = sanitize(nif);
+
+    // NIF validation: must be exactly 9 digits and start with valid digits (Portugal)
+    const validNif = /^[125689]\d{8}$/.test(cleanedNif);
+
+    if (!validNif) {
       toast({
         title: "NIF inválido",
-        description: "Por favor, insira um NIF válido (9 dígitos).",
+        description: "Por favor, insira um NIF português válido (9 dígitos, começando por 1, 2, 5, 6, 8, ou 9).",
         variant: "destructive",
       });
       setLoading(false);
       return;
     }
 
-    const { error } = await signUp(email, password, name, nif);
+    const { error } = await signUp(cleanedEmail, cleanedPassword, cleanedName, cleanedNif);
 
     if (error) {
       toast({
@@ -126,6 +173,7 @@ const Auth = () => {
                       required
                       inputMode="email"
                       className="text-sm py-2"
+                      autoComplete="username"
                     />
                   </div>
                   <div className="space-y-2">
@@ -137,6 +185,7 @@ const Auth = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       className="text-sm py-2"
+                      autoComplete="current-password"
                     />
                   </div>
                   <Button type="submit" className="w-full py-2 text-base" disabled={loading}>
@@ -157,6 +206,7 @@ const Auth = () => {
                       onChange={(e) => setName(e.target.value)}
                       required
                       className="text-sm py-2"
+                      autoComplete="name"
                     />
                   </div>
                   <div className="space-y-2">
@@ -171,6 +221,7 @@ const Auth = () => {
                       minLength={9}
                       maxLength={9}
                       className="text-sm py-2"
+                      autoComplete="off"
                     />
                   </div>
                   <div className="space-y-2">
@@ -184,6 +235,7 @@ const Auth = () => {
                       required
                       inputMode="email"
                       className="text-sm py-2"
+                      autoComplete="username"
                     />
                   </div>
                   <div className="space-y-2">
@@ -196,6 +248,7 @@ const Auth = () => {
                       required
                       minLength={6}
                       className="text-sm py-2"
+                      autoComplete="new-password"
                     />
                   </div>
                   <Button type="submit" className="w-full py-2 text-base" disabled={loading}>

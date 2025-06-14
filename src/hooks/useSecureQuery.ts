@@ -11,7 +11,7 @@ interface PaginationOptions {
   pageSize?: number;
 }
 
-export interface SecureQueryOptions<T = any> {
+export interface SecureQueryOptions {
   queryKey: QueryKey;
   table: TableName;
   selectFields?: string;
@@ -22,8 +22,9 @@ export interface SecureQueryOptions<T = any> {
   staleTime?: number;
 }
 
-// Evita generics profundos em useQuery e define T[] no retorno direto
-export function useSecureQuery<T = any>({
+// Remove generics from hook to avoid type recursion issues.
+// You can apply post-query casting in components as needed.
+export function useSecureQuery({
   queryKey,
   table,
   selectFields = '*',
@@ -32,11 +33,11 @@ export function useSecureQuery<T = any>({
   requireCompanyAccess = true,
   enabled = true,
   staleTime = 5 * 60 * 1000,
-}: SecureQueryOptions<T>) {
-  return useQuery<T[], Error>({
+}: SecureQueryOptions) {
+  // The return type is always any[] (cast in the consuming component if needed)
+  return useQuery<any[], Error>({
     queryKey,
-    // Explicit return type here avoids unnecessary recursion in type inference
-    queryFn: async (): Promise<T[]> => {
+    queryFn: async (): Promise<any[]> => {
       const session = await authService.getSecureSession();
       if (!session) {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
@@ -68,7 +69,7 @@ export function useSecureQuery<T = any>({
         throw new Error(`Erro ao buscar dados: ${error.message}`);
       }
 
-      return data as T[];
+      return data as any[];
     },
     staleTime,
     retry: (failureCount, error) => {

@@ -1,5 +1,5 @@
 
-import { useQuery, QueryKey, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -22,6 +22,7 @@ export interface SecureQueryOptions<T = any> {
   staleTime?: number;
 }
 
+// Evita generics profundos em useQuery e define T[] no retorno direto
 export function useSecureQuery<T = any>({
   queryKey,
   table,
@@ -32,7 +33,7 @@ export function useSecureQuery<T = any>({
   enabled = true,
   staleTime = 5 * 60 * 1000,
 }: SecureQueryOptions<T>) {
-  return useQuery({
+  return useQuery<T[], Error>({
     queryKey,
     queryFn: async () => {
       const session = await authService.getSecureSession();
@@ -66,7 +67,7 @@ export function useSecureQuery<T = any>({
         throw new Error(`Erro ao buscar dados: ${error.message}`);
       }
 
-      return data as T;
+      return data as T[];
     },
     staleTime,
     retry: (failureCount, error) => {

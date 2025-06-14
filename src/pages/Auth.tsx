@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [nif, setNif] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -49,7 +49,18 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signUp(email, password, name);
+    // Verifica NIF (pode ajustar validação para formato se quiser)
+    if (!nif || nif.length < 9) {
+      toast({
+        title: "NIF inválido",
+        description: "Por favor, insira um NIF válido (9 dígitos).",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await signUp(email, password, name, nif);
 
     if (error) {
       toast({
@@ -145,6 +156,20 @@ const Auth = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
+                      className="text-sm py-2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nif">NIF</Label>
+                    <Input
+                      id="nif"
+                      type="text"
+                      placeholder="Número de Identificação Fiscal"
+                      value={nif}
+                      onChange={(e) => setNif(e.target.value.replace(/\D/g, ""))}
+                      required
+                      minLength={9}
+                      maxLength={9}
                       className="text-sm py-2"
                     />
                   </div>

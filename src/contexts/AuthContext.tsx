@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   companyId: string | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string, nif: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -100,11 +99,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, nif: string) => {
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/`;
-      
+
+      // envia name e nif como user_metadata
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -112,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           emailRedirectTo: redirectUrl,
           data: {
             name: name,
+            nif: nif,
           },
         },
       });

@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { validateJournalEntry, AccountingError, formatCurrency } from "@/utils/accountingValidations";

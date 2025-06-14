@@ -8,7 +8,10 @@ interface JournalEntry {
 }
 
 interface JournalEntryLine {
-  account_id: string;
+  id: string;
+  account_code: string;
+  account_name: string;
+  description: string;
   debit_amount: number;
   credit_amount: number;
 }

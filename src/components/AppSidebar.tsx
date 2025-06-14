@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +15,8 @@ import {
   Euro,
   Package,
   FileText,
-  Calculator
+  Calculator,
+  Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -55,6 +55,11 @@ const items = [
     title: "Contabilidade",
     value: "accounting",
     icon: Calculator,
+  },
+  {
+    title: "Integrações",
+    value: "integrations",
+    icon: Settings,
   }
 ];
 

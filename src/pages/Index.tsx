@@ -1,3 +1,4 @@
+
 declare global {
   interface Window {
     __lovableSidebarTrigger__?: () => void;
@@ -15,6 +16,7 @@ import { ReportsModule } from "@/components/ReportsModule";
 import { SuppliersManagement } from "@/components/SuppliersManagement";
 import { StockManagement } from "@/components/StockManagement";
 import { AccountingModule } from "@/components/accounting/AccountingModule";
+import { IntegrationsModule } from "@/components/IntegrationsModule"; // <--- Novo import
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -27,7 +29,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        {/* Sidebar visible em todas as telas, Drawer no mobile */}
+        {/* Sidebar visível em todas as telas, Drawer no mobile */}
         <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Botão flutuante para abrir sidebar no mobile */}
@@ -83,6 +85,10 @@ const Index = () => {
 
               <TabsContent value="accounting" className="space-y-6">
                 <AccountingModule />
+              </TabsContent>
+
+              <TabsContent value="integrations" className="space-y-6">
+                <IntegrationsModule />
               </TabsContent>
             </Tabs>
           </main>

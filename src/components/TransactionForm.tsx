@@ -2,12 +2,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TransactionSchema, TransactionSchemaType } from "@/schemas/transactionSchema";
+import { TransactionSchema, TransactionFormData } from "@/schemas/transactionSchema";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-export default function TransactionForm({ onSubmit }: { onSubmit: (data: TransactionSchemaType) => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<TransactionSchemaType>({
+export default function TransactionForm({ onSubmit }: { onSubmit: (data: TransactionFormData) => void }) {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<TransactionFormData>({
     resolver: zodResolver(TransactionSchema),
     mode: "onTouched"
   });

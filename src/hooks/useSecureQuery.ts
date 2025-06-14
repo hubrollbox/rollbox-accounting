@@ -35,7 +35,8 @@ export function useSecureQuery<T = any>({
 }: SecureQueryOptions<T>) {
   return useQuery<T[], Error>({
     queryKey,
-    queryFn: async () => {
+    // Explicit return type here avoids unnecessary recursion in type inference
+    queryFn: async (): Promise<T[]> => {
       const session = await authService.getSecureSession();
       if (!session) {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');

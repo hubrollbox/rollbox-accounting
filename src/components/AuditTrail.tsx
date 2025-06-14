@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,7 @@ interface AuditLog {
 }
 
 export const AuditTrail: React.FC = () => {
-  const { data, isLoading, error } = useSecureQuery<AuditLog[]>({
+  const { data, isLoading, error } = useSecureQuery<AuditLog>({
     queryKey: ['audit-logs'],
     table: 'audit_logs',
     selectFields: `
@@ -93,6 +92,7 @@ export const AuditTrail: React.FC = () => {
     );
   }
 
+  // Now data is type AuditLog[], so we can use it directly
   const auditLogArray: AuditLog[] = Array.isArray(data) ? data : [];
 
   return (

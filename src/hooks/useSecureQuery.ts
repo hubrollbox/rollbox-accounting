@@ -2,9 +2,11 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+// Remover referência ao tipo Database para evitar inferência profunda
+// import type { Database } from '@/integrations/supabase/types';
 
-type TableName = keyof Database['public']['Tables'];
+// Tornar TableName apenas uma string simples
+type TableName = string;
 
 interface PaginationOptions {
   page?: number;
@@ -22,8 +24,7 @@ export interface SecureQueryOptions {
   staleTime?: number;
 }
 
-// Remove ALL generics from this hook.
-// Set all returns to 'any', disable TS inference inside useQuery.
+// Nenhum tipo genérico! Tudo 'any', retorna array ou vazio.
 export function useSecureQuery(options: SecureQueryOptions): any {
   const {
     queryKey,
@@ -36,7 +37,6 @@ export function useSecureQuery(options: SecureQueryOptions): any {
     staleTime = 5 * 60 * 1000,
   } = options;
 
-  // Note: Specify <any, any> explicitly here to silence TS recursion/inference.
   return useQuery<any, any>({
     queryKey,
     queryFn: async () => {
@@ -45,7 +45,8 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
-      let query = supabase.from(table).select(selectFields);
+      // Usar .from(table as string), sem tipo ou inferência!
+      let query = supabase.from(table as string).select(selectFields);
 
       if (requireCompanyAccess && session.company_id) {
         query = query.eq('company_id', session.company_id);
@@ -71,8 +72,8 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new Error(`Erro ao buscar dados: ${error.message}`);
       }
 
-      // Always return array or [] for usage convenience
-      return data || [];
+      // Forçar retorno array tipo any[]
+      return (data as any[]) || [];
     },
     staleTime,
     retry: (failureCount: number, error: any) => {
@@ -89,3 +90,4 @@ export function useSecureQuery(options: SecureQueryOptions): any {
 export const useSecureMutation = () => {
   return null;
 };
+

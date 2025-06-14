@@ -56,7 +56,7 @@ const items = [
     value: "accounting",
     icon: Calculator,
   },
-  // Removido: Integrações
+  // "Integrações" REMOVIDO — só nas configurações do perfil!
 ];
 
 export function AppSidebar({ activeTab, onTabChange }: { activeTab: string, onTabChange: (tab: string) => void }) {

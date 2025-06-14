@@ -21,7 +21,8 @@ interface AuditLog {
 }
 
 export const AuditTrail: React.FC = () => {
-  const { data, isLoading, error } = useSecureQuery<AuditLog>({
+  // Remove the generic parameter!
+  const { data, isLoading, error } = useSecureQuery({
     queryKey: ['audit-logs'],
     table: 'audit_logs',
     selectFields: `
@@ -92,8 +93,8 @@ export const AuditTrail: React.FC = () => {
     );
   }
 
-  // Now data is type AuditLog[], so we can use it directly
-  const auditLogArray: AuditLog[] = Array.isArray(data) ? data : [];
+  // Type assertion after fetching
+  const auditLogArray: AuditLog[] = Array.isArray(data) ? data as AuditLog[] : [];
 
   return (
     <Card>

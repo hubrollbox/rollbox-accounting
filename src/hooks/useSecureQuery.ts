@@ -1,5 +1,6 @@
 
-import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
+
+import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -11,14 +12,15 @@ interface PaginationOptions {
   pageSize?: number;
 }
 
-export interface SecureQueryOptions<T>
-  extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn' | 'queryKey'> {
+export interface SecureQueryOptions<T> {
   queryKey: QueryKey;
   table: TableName;
   selectFields?: string;
   filters?: Record<string, any>;
   pagination?: PaginationOptions;
   requireCompanyAccess?: boolean;
+  enabled?: boolean;
+  staleTime?: number;
 }
 
 export function useSecureQuery<T = any>({
@@ -28,9 +30,10 @@ export function useSecureQuery<T = any>({
   filters = {},
   pagination,
   requireCompanyAccess = true,
-  ...options
+  enabled = true,
+  staleTime = 5 * 60 * 1000,
 }: SecureQueryOptions<T>) {
-  return useQuery<T, Error>({
+  return useQuery({
     queryKey,
     queryFn: async (): Promise<T> => {
       const session = await authService.getSecureSession();
@@ -66,14 +69,14 @@ export function useSecureQuery<T = any>({
 
       return data as T;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime,
     retry: (failureCount, error) => {
       if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
         return false;
       }
       return failureCount < 3;
     },
-    ...options,
+    enabled,
   });
 }
 
@@ -81,3 +84,4 @@ export function useSecureQuery<T = any>({
 export const useSecureMutation = () => {
   return null;
 };
+

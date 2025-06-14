@@ -19,6 +19,7 @@ import { Header } from "@/components/Header";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { PanelLeft } from "lucide-react";
+import { SidebarTriggerMobile } from "@/components/SidebarTriggerMobile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -93,39 +94,5 @@ const Index = () => {
     </SidebarProvider>
   );
 };
-
-// Componente invisível só para disparar SidebarTrigger (por evento custom)
-function SidebarTriggerMobile() {
-  // Esta função garante que o Sidebar no mobile pode ser "aberto" via evento global
-  // O SidebarProvider já lida com openMobile/setOpenMobile via AppSidebar
-  // Aqui simulamos clique no SidebarTrigger real
-  // O SidebarTrigger controla o estado do Drawer via contexto
-  // Fazendo um trigger virtual
-  // Só existe no mobile
-  if (typeof window !== "undefined") {
-    window.__lovableSidebarTrigger__ = window.__lovableSidebarTrigger__ || (() => {});
-  }
-
-  return (
-    <span
-      className="hidden"
-      id="trigger-sidebar-mobile"
-      aria-hidden="true"
-      ref={el => {
-        if (el && typeof window !== "undefined") {
-          window.__lovableSidebarTrigger__ = () => {
-            el.click();
-          };
-          // Listener para evento customizado
-          window.addEventListener("openSidebarMobile", () => {
-            el.click();
-          });
-        }
-      }}
-    >
-      <SidebarTrigger style={{ display: "none" }} />
-    </span>
-  );
-}
 
 export default Index;

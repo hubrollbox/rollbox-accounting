@@ -1,13 +1,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Euro, LogOut } from "lucide-react";
+import { Shield, Euro, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
@@ -15,6 +17,10 @@ export const Header = () => {
       title: "Sessão terminada",
       description: "Até à próxima!",
     });
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
   };
 
   return (
@@ -27,7 +33,7 @@ export const Header = () => {
                 <Euro className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">ContaFácil PT</h2>
+                <h2 className="text-lg font-semibold text-foreground">Accounting</h2>
                 <p className="text-xs text-muted-foreground">Sistema Certificado AT</p>
               </div>
             </div>
@@ -41,7 +47,8 @@ export const Header = () => {
             <span className="text-sm text-muted-foreground">
               {user?.email}
             </span>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleProfileClick}>
+              <User className="w-4 h-4 mr-2" />
               Perfil
             </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>

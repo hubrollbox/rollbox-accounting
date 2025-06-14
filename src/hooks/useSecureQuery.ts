@@ -22,8 +22,8 @@ export interface SecureQueryOptions {
   staleTime?: number;
 }
 
-// Remove all generics & default type params (they lead to recursion).
-// Return type set to any to avoid TypeScript excessive recursion error.
+// Remove ALL generics from this hook.
+// Set all returns to 'any', disable TS inference inside useQuery.
 export function useSecureQuery(options: SecureQueryOptions): any {
   const {
     queryKey,
@@ -36,8 +36,8 @@ export function useSecureQuery(options: SecureQueryOptions): any {
     staleTime = 5 * 60 * 1000,
   } = options;
 
-  // Explicitly not using generics here.
-  return useQuery({
+  // Note: Specify <any, any> explicitly here to silence TS recursion/inference.
+  return useQuery<any, any>({
     queryKey,
     queryFn: async () => {
       const session = await authService.getSecureSession();

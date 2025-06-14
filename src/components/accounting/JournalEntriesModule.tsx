@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Save, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { validateJournalEntry, AccountingError, formatCurrency } from "@/utils/accountingValidations";
+import { authService } from "@/services/authService";
+import { supabase } from "@/integrations/supabase/client";
 
 interface JournalEntryLine {
   id: string;
@@ -36,7 +37,6 @@ export const JournalEntriesModule = () => {
     accounting_date: new Date().toISOString().split('T')[0],
     lines: [],
   });
-
   const [newLine, setNewLine] = useState<Partial<JournalEntryLine>>({
     account_code: '',
     account_name: '',
@@ -44,8 +44,21 @@ export const JournalEntriesModule = () => {
     debit_amount: 0,
     credit_amount: 0,
   });
-
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load the current company's ID from the session.
+    async function fetchCompanyId() {
+      try {
+        const session = await authService.getSecureSession();
+        setCompanyId(session?.company_id ?? null);
+      } catch (error) {
+        setCompanyId(null);
+      }
+    }
+    fetchCompanyId();
+  }, []);
 
   const addLine = () => {
     if (!newLine.account_code || (!newLine.debit_amount && !newLine.credit_amount)) {
@@ -105,7 +118,6 @@ export const JournalEntriesModule = () => {
       errors.push(`Lançamento não equilibrado: Débitos ${formatCurrency(totalDebit)} ≠ Créditos ${formatCurrency(totalCredit)}`);
     }
 
-    // Verificar se cada linha tem apenas débito OU crédito
     lines.forEach((line, index) => {
       if ((line.debit_amount > 0 && line.credit_amount > 0) || 
           (line.debit_amount === 0 && line.credit_amount === 0)) {
@@ -115,7 +127,6 @@ export const JournalEntriesModule = () => {
 
     setValidationErrors(errors);
 
-    // Atualizar total
     setCurrentEntry(prev => ({
       ...prev,
       total_amount: Math.max(totalDebit, totalCredit),
@@ -123,38 +134,98 @@ export const JournalEntriesModule = () => {
   };
 
   const saveEntry = async () => {
+    if (!companyId) {
+      toast({
+        title: "Erro de permissão",
+        description: "Empresa não encontrada (você não tem permissão para lançar).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (!currentEntry.lines || currentEntry.lines.length === 0) {
         throw new Error("Adicione pelo menos uma linha ao lançamento");
       }
-
+      const entryId = crypto.randomUUID();
       const entry = {
-        id: crypto.randomUUID(),
-        company_id: 'temp-company-id', // TODO: Get from context
+        id: entryId,
+        company_id: companyId, // CHANGE: use company_id from session
+        entry_number: entryId.slice(0, 8), // Placeholder: Should be auto-generated/sequence
         accounting_date: currentEntry.accounting_date!,
+        description: currentEntry.description ?? "",
         total_amount: currentEntry.total_amount || 0,
+        status: "DRAFT",
         lines: currentEntry.lines,
       };
 
       await validateJournalEntry(entry);
 
-      // TODO: Save to Supabase
-      console.log('Saving journal entry:', entry);
+      // Insert journal entry in DB
+      const { error: entryError } = await supabase.from('journal_entries').insert([
+        {
+          id: entry.id,
+          company_id: entry.company_id,
+          entry_number: entry.entry_number,
+          description: entry.description,
+          accounting_date: entry.accounting_date,
+          total_amount: entry.total_amount,
+          status: entry.status,
+        }
+      ]);
+      if (entryError) {
+        if (entryError.code === '42501' || entryError.message?.includes('row-level security policy')) {
+          toast({
+            title: "Acesso negado",
+            description: "Você não tem permissão para inserir lançamentos para esta empresa.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw entryError;
+      }
+
+      // Get chart of account for each line (for the correct account_id)
+      const linesWithId = [];
+      for (const line of entry.lines) {
+        // Busca a conta pelo código e pela company_id
+        const { data: accountList, error: accountError } = await supabase
+          .from('chart_of_accounts')
+          .select('id')
+          .eq('company_id', companyId)
+          .eq('code', line.account_code)
+          .maybeSingle();
+        if (accountError || !accountList?.id) {
+          throw new Error(`Conta contábil "${line.account_code}" não encontrada`);
+        }
+        linesWithId.push({
+          id: line.id,
+          journal_entry_id: entry.id,
+          account_id: accountList.id,
+          description: line.description,
+          debit_amount: line.debit_amount,
+          credit_amount: line.credit_amount,
+        });
+      }
+
+      // Insert journal entry lines in DB
+      const { error: lineError } = await supabase.from('journal_entry_lines').insert(linesWithId);
+      if (lineError) {
+        throw lineError;
+      }
 
       toast({
         title: "Lançamento salvo",
         description: "Lançamento contábil criado com sucesso.",
       });
 
-      // Reset form
       setCurrentEntry({
         description: '',
         accounting_date: new Date().toISOString().split('T')[0],
         lines: [],
       });
       setValidationErrors([]);
-
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AccountingError) {
         toast({
           title: "Erro de validação",
@@ -164,7 +235,7 @@ export const JournalEntriesModule = () => {
       } else {
         toast({
           title: "Erro",
-          description: "Erro ao salvar lançamento.",
+          description: error.message ?? "Erro ao salvar lançamento.",
           variant: "destructive",
         });
       }

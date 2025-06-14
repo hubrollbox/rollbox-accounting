@@ -1,4 +1,3 @@
-
 interface JournalEntry {
   id: string;
   company_id: string;
@@ -72,6 +71,14 @@ export const validateJournalEntry = async (entry: JournalEntry): Promise<void> =
         'Cada linha deve ter apenas débito OU crédito'
       );
     }
+  }
+
+  // 6. Validar que company_id existe e é string
+  if (!entry.company_id || typeof entry.company_id !== "string") {
+    throw new AccountingError(
+      'COMPANY_MISSING',
+      'Lançamento deve estar associado a uma empresa válida'
+    );
   }
 };
 

@@ -2,10 +2,7 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
-// Remover referência ao tipo Database para evitar inferência profunda
-// import type { Database } from '@/integrations/supabase/types';
 
-// Tornar TableName apenas uma string simples
 type TableName = string;
 
 interface PaginationOptions {
@@ -24,7 +21,7 @@ export interface SecureQueryOptions {
   staleTime?: number;
 }
 
-// Nenhum tipo genérico! Tudo 'any', retorna array ou vazio.
+// Hook sem inferência profunda de tipo, ignorando generics no .from
 export function useSecureQuery(options: SecureQueryOptions): any {
   const {
     queryKey,
@@ -45,8 +42,8 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
-      // Usar .from(table as string), sem tipo ou inferência!
-      let query = supabase.from(table as string).select(selectFields);
+      // Evita inferência: usa "as any" no parâmetro do .from()
+      let query = supabase.from<any>(table as any).select(selectFields);
 
       if (requireCompanyAccess && session.company_id) {
         query = query.eq('company_id', session.company_id);
@@ -72,7 +69,6 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new Error(`Erro ao buscar dados: ${error.message}`);
       }
 
-      // Forçar retorno array tipo any[]
       return (data as any[]) || [];
     },
     staleTime,
@@ -90,4 +86,3 @@ export function useSecureQuery(options: SecureQueryOptions): any {
 export const useSecureMutation = () => {
   return null;
 };
-

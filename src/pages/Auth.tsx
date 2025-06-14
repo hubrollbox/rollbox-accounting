@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +76,7 @@ const Auth = () => {
               <Euro className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">ContaFácil PT</h1>
+              <h1 className="text-2xl font-bold text-foreground">Accounting</h1>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Shield className="w-3 h-3" />
                 Sistema Certificado AT

@@ -1,5 +1,5 @@
 
-import { useQuery, QueryKey } from '@tanstack/react-query';
+import { useQuery, QueryKey, UseQueryOptions } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -11,7 +11,7 @@ interface PaginationOptions {
   pageSize?: number;
 }
 
-export interface SecureQueryOptions<T> {
+export interface SecureQueryOptions<T = any> {
   queryKey: QueryKey;
   table: TableName;
   selectFields?: string;
@@ -32,7 +32,7 @@ export function useSecureQuery<T = any>({
   enabled = true,
   staleTime = 5 * 60 * 1000,
 }: SecureQueryOptions<T>) {
-  return useQuery<T, Error, T, QueryKey>({
+  return useQuery({
     queryKey,
     queryFn: async () => {
       const session = await authService.getSecureSession();

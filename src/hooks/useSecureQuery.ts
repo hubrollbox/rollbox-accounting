@@ -1,5 +1,4 @@
 
-
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,9 +32,9 @@ export function useSecureQuery<T = any>({
   enabled = true,
   staleTime = 5 * 60 * 1000,
 }: SecureQueryOptions<T>) {
-  return useQuery({
+  return useQuery<T, Error, T, QueryKey>({
     queryKey,
-    queryFn: async (): Promise<T> => {
+    queryFn: async () => {
       const session = await authService.getSecureSession();
       if (!session) {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
@@ -84,4 +83,3 @@ export function useSecureQuery<T = any>({
 export const useSecureMutation = () => {
   return null;
 };
-

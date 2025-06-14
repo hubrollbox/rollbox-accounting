@@ -12,19 +12,26 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { AuthLoginForm } from "@/components/auth/AuthLoginForm";
 import { AuthRegisterForm } from "@/components/auth/AuthRegisterForm";
+import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [nif, setNif] = useState("");
+  // Estados separados para login
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  // Estados separados para registro
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerName, setRegisterName] = useState("");
+  const [registerNif, setRegisterNif] = useState("");
   const [loading, setLoading] = useState(false);
   const { signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const inactivityTimeoutRef = useRef<any>(null);
+
+  useRedirectIfAuthenticated();
 
   // Session timeout and automatic signout
   useEffect(() => {
@@ -75,24 +82,24 @@ const Auth = () => {
                 <AuthLoginForm
                   setLoading={setLoading}
                   loading={loading}
-                  email={email}
-                  setEmail={setEmail}
-                  password={password}
-                  setPassword={setPassword}
+                  email={loginEmail}
+                  setEmail={setLoginEmail}
+                  password={loginPassword}
+                  setPassword={setLoginPassword}
                 />
               </TabsContent>
               <TabsContent value="register">
                 <AuthRegisterForm
                   setLoading={setLoading}
                   loading={loading}
-                  email={email}
-                  setEmail={setEmail}
-                  password={password}
-                  setPassword={setPassword}
-                  name={name}
-                  setName={setName}
-                  nif={nif}
-                  setNif={setNif}
+                  email={registerEmail}
+                  setEmail={setRegisterEmail}
+                  password={registerPassword}
+                  setPassword={setRegisterPassword}
+                  name={registerName}
+                  setName={setRegisterName}
+                  nif={registerNif}
+                  setNif={setRegisterNif}
                 />
               </TabsContent>
             </Tabs>

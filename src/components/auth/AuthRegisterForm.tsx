@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,12 @@ export const AuthRegisterForm = ({
 }: AuthRegisterFormProps) => {
   const { signUp } = useAuth();
   const { toast } = useToast();
+  const errorRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
 
   // Helper to sanitize all fields before sending to backend
   const sanitize = (value: string) => {
@@ -59,6 +65,7 @@ export const AuthRegisterForm = ({
         description: "Por favor, insira um NIF português válido (9 dígitos, começando por 1, 2, 5, 6, 8, ou 9).",
         variant: "destructive",
       });
+      setTimeout(() => errorRef.current?.focus(), 120);
       setLoading(false);
       return;
     }
@@ -74,6 +81,7 @@ export const AuthRegisterForm = ({
             : error.message,
         variant: "destructive",
       });
+      setTimeout(() => errorRef.current?.focus(), 120);
     } else {
       toast({
         title: "Registo realizado com sucesso",
@@ -85,7 +93,7 @@ export const AuthRegisterForm = ({
   };
 
   return (
-    <form onSubmit={handleSignUp} className="space-y-4">
+    <form onSubmit={handleSignUp} className="space-y-4" aria-live="polite">
       <div className="space-y-2">
         <Label htmlFor="register-name">Nome</Label>
         <Input
@@ -97,6 +105,9 @@ export const AuthRegisterForm = ({
           required
           className="text-sm py-2"
           autoComplete="name"
+          ref={nameRef}
+          disabled={loading}
+          aria-required="true"
         />
       </div>
       <div className="space-y-2">
@@ -112,6 +123,8 @@ export const AuthRegisterForm = ({
           maxLength={9}
           className="text-sm py-2"
           autoComplete="off"
+          disabled={loading}
+          aria-required="true"
         />
       </div>
       <div className="space-y-2">
@@ -126,6 +139,8 @@ export const AuthRegisterForm = ({
           inputMode="email"
           className="text-sm py-2"
           autoComplete="username"
+          disabled={loading}
+          aria-required="true"
         />
       </div>
       <div className="space-y-2">
@@ -139,11 +154,19 @@ export const AuthRegisterForm = ({
           minLength={6}
           className="text-sm py-2"
           autoComplete="new-password"
+          disabled={loading}
+          aria-required="true"
         />
       </div>
       <Button type="submit" className="w-full py-2 text-base" disabled={loading}>
         {loading ? "A registar..." : "Registar"}
       </Button>
+      <div
+        ref={errorRef}
+        tabIndex={-1}
+        aria-live="assertive"
+        className="sr-only"
+      />
     </form>
   );
 };

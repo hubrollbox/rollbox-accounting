@@ -60,6 +60,12 @@ export const JournalEntriesModule = () => {
     fetchCompanyId();
   }, []);
 
+  const sanitizeNumber = (v: any) => {
+    const parsed = parseFloat((v || "").toString().replace(",", "."));
+    return isNaN(parsed) ? 0 : Number(parsed.toFixed(2));
+  };
+  const sanitizeString = (v: any) => (v || "").toString().trim();
+
   const addLine = () => {
     if (!newLine.account_code || (!newLine.debit_amount && !newLine.credit_amount)) {
       toast({
@@ -72,11 +78,11 @@ export const JournalEntriesModule = () => {
 
     const line: JournalEntryLine = {
       id: crypto.randomUUID(),
-      account_code: newLine.account_code!,
-      account_name: newLine.account_name || newLine.account_code!,
-      description: newLine.description || '',
-      debit_amount: newLine.debit_amount || 0,
-      credit_amount: newLine.credit_amount || 0,
+      account_code: sanitizeString(newLine.account_code!),
+      account_name: sanitizeString(newLine.account_name || newLine.account_code!),
+      description: sanitizeString(newLine.description || ''),
+      debit_amount: sanitizeNumber(newLine.debit_amount),
+      credit_amount: sanitizeNumber(newLine.credit_amount),
     };
 
     setCurrentEntry(prev => ({
@@ -142,7 +148,6 @@ export const JournalEntriesModule = () => {
       });
       return;
     }
-
     try {
       if (!currentEntry.lines || currentEntry.lines.length === 0) {
         throw new Error("Adicione pelo menos uma linha ao lançamento");
@@ -150,13 +155,18 @@ export const JournalEntriesModule = () => {
       const entryId = crypto.randomUUID();
       const entry = {
         id: entryId,
-        company_id: companyId, // CHANGE: use company_id from session
-        entry_number: entryId.slice(0, 8), // Placeholder: Should be auto-generated/sequence
-        accounting_date: currentEntry.accounting_date!,
-        description: currentEntry.description ?? "",
+        company_id: companyId,
+        entry_number: entryId.slice(0, 8),
+        accounting_date: sanitizeString(currentEntry.accounting_date!),
+        description: sanitizeString(currentEntry.description ?? ""),
         total_amount: currentEntry.total_amount || 0,
         status: "DRAFT",
-        lines: currentEntry.lines,
+        lines: (currentEntry.lines || []).map(line => ({
+          ...line,
+          description: sanitizeString(line.description),
+          debit_amount: sanitizeNumber(line.debit_amount),
+          credit_amount: sanitizeNumber(line.credit_amount),
+        })),
       };
 
       await validateJournalEntry(entry);
@@ -174,7 +184,7 @@ export const JournalEntriesModule = () => {
         }
       ]);
       if (entryError) {
-        if (entryError.code === '42501' || entryError.message?.includes('row-level security policy')) {
+        if (entryError.code === '42501' || entryError.message?.toLowerCase().includes('row-level security policy')) {
           toast({
             title: "Acesso negado",
             description: "Você não tem permissão para inserir lançamentos para esta empresa.",
@@ -202,15 +212,23 @@ export const JournalEntriesModule = () => {
           id: line.id,
           journal_entry_id: entry.id,
           account_id: accountList.id,
-          description: line.description,
-          debit_amount: line.debit_amount,
-          credit_amount: line.credit_amount,
+          description: sanitizeString(line.description),
+          debit_amount: sanitizeNumber(line.debit_amount),
+          credit_amount: sanitizeNumber(line.credit_amount),
         });
       }
 
       // Insert journal entry lines in DB
       const { error: lineError } = await supabase.from('journal_entry_lines').insert(linesWithId);
       if (lineError) {
+        if (lineError.code === '42501' || lineError.message?.toLowerCase().includes('row-level security policy')) {
+          toast({
+            title: "Acesso negado",
+            description: "Você não tem permissão para inserir linhas de lançamento para esta empresa.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw lineError;
       }
 
@@ -230,6 +248,12 @@ export const JournalEntriesModule = () => {
         toast({
           title: "Erro de validação",
           description: error.message,
+          variant: "destructive",
+        });
+      } else if (error?.message?.toLowerCase().includes("row-level security")) {
+        toast({
+          title: "Erro de permissão",
+          description: "Você não tem permissão para esta operação (RLS).",
           variant: "destructive",
         });
       } else {

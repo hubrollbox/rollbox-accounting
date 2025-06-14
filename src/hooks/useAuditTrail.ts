@@ -21,20 +21,12 @@ export const useAuditTrail = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Remover busca externa de IP
   const logAction = async (action: Omit<AuditLog, 'id' | 'timestamp' | 'created_at' | 'user_id' | 'ip_address' | 'device_info'>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      // Get IP address
-      let ipAddress = null;
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        ipAddress = ipData.ip;
-      } catch (error) {
-        console.warn('Could not fetch IP address:', error);
-      }
 
+      // Usar apenas device_info localmente. IP será tratado por trigger no banco.
       const { error } = await supabase.from('audit_logs').insert({
         user_id: user?.id,
         action: action.action,
@@ -42,7 +34,7 @@ export const useAuditTrail = () => {
         entity_id: action.entity_id,
         old_value: action.old_value,
         new_value: action.new_value,
-        ip_address: ipAddress,
+        ip_address: null,
         device_info: navigator.userAgent,
       });
 

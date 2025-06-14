@@ -1,3 +1,4 @@
+
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +21,6 @@ export interface SecureQueryOptions {
   staleTime?: number;
 }
 
-// Hook sem inferência profunda de tipo, ignorando generics no .from
 export function useSecureQuery(options: SecureQueryOptions): any {
   const {
     queryKey,
@@ -41,14 +41,22 @@ export function useSecureQuery(options: SecureQueryOptions): any {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
-      // Fix: Avoid type arg, just cast to any
-      let query = (supabase.from(table as any) as any).select(selectFields);
-
-      if (requireCompanyAccess && session.company_id) {
-        query = query.eq('company_id', session.company_id);
+      let finalFilters = { ...filters };
+      if (requireCompanyAccess) {
+        // Enforce company_id presence and match
+        if (!session.company_id) {
+          // Prevent data leak: Do NOT query if company_id is missing
+          throw new AuthError(
+            'NO_COMPANY_ACCESS',
+            'Acesso à empresa não permitido: nenhum company_id associado ao utilizador autenticado.'
+          );
+        }
+        finalFilters.company_id = session.company_id;
       }
 
-      Object.entries(filters).forEach(([key, value]) => {
+      let query = (supabase.from(table as any) as any).select(selectFields);
+
+      Object.entries(finalFilters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           query = query.eq(key, value);
         }
@@ -81,7 +89,6 @@ export function useSecureQuery(options: SecureQueryOptions): any {
   });
 }
 
-// Placeholder para mutation segura se necessário
 export const useSecureMutation = () => {
   return null;
 };

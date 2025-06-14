@@ -1,16 +1,20 @@
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
 import { authService, AuthError } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type TableName = keyof Database['public']['Tables'];
 
 interface PaginationOptions {
   page?: number;
   pageSize?: number;
 }
 
-interface SecureQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryFn'> {
-  table: string;
-  select?: string;
+interface SecureQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn'> {
+  queryKey: QueryKey;
+  table: TableName;
+  selectFields?: string;
   filters?: Record<string, any>;
   pagination?: PaginationOptions;
   requireCompanyAccess?: boolean;
@@ -19,39 +23,37 @@ interface SecureQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryFn'> {
 export const useSecureQuery = <T = any>({
   queryKey,
   table,
-  select = '*',
+  selectFields = '*',
   filters = {},
   pagination,
   requireCompanyAccess = true,
   ...options
 }: SecureQueryOptions<T>) => {
-  return useQuery({
+  return useQuery<T, Error>({
     queryKey: queryKey,
     queryFn: async (): Promise<T> => {
       // Verificar autenticação e autorização
       const session = await authService.getSecureSession();
-      
       if (!session) {
         throw new AuthError('UNAUTHORIZED', 'Usuário não autenticado');
       }
 
       // Construir query base
-      let query = supabase.from(table).select(select);
+      let query = supabase.from(table).select(selectFields);
 
-      // Aplicar filtros de segurança automáticos
+      // Filtro automático por company_id
       if (requireCompanyAccess && session.company_id) {
-        // Adicionar filtro de company_id automaticamente se a tabela tiver essa coluna
         query = query.eq('company_id', session.company_id);
       }
 
-      // Aplicar filtros adicionais
+      // Filtros adicionais
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           query = query.eq(key, value);
         }
       });
 
-      // Aplicar paginação se especificada
+      // Paginação
       if (pagination) {
         const { page = 1, pageSize = 50 } = pagination;
         const from = (page - 1) * pageSize;
@@ -69,11 +71,10 @@ export const useSecureQuery = <T = any>({
 
       return data as T;
     },
-    // Configurações padrão para cache e refetch
+    // Cache e refetch
     staleTime: 5 * 60 * 1000, // 5 minutos
-    cacheTime: 30 * 60 * 1000, // 30 minutos
+    // cacheTime removido pois não existe mais nessa versão
     retry: (failureCount, error) => {
-      // Não tentar novamente para erros de autorização
       if (error instanceof AuthError && error.code === 'UNAUTHORIZED') {
         return false;
       }
@@ -83,7 +84,7 @@ export const useSecureQuery = <T = any>({
   });
 };
 
+// Placeholder para mutation segura se necessário
 export const useSecureMutation = () => {
-  // TODO: Implementar mutations seguras com validações
   return null;
 };

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Euro, Users, FileText, Hash, Truck, Package } from "lucide-react";
+import { Euro, Users, FileText, Hash, Truck, Package, Calculator } from "lucide-react";
 import { Dashboard } from "@/components/Dashboard";
 import { ClientsManagement } from "@/components/ClientsManagement";
 import { ProductsManagement } from "@/components/ProductsManagement";
@@ -11,6 +11,7 @@ import { InvoicingModule } from "@/components/InvoicingModule";
 import { ReportsModule } from "@/components/ReportsModule";
 import { SuppliersManagement } from "@/components/SuppliersManagement";
 import { StockManagement } from "@/components/StockManagement";
+import { AccountingModule } from "@/components/accounting/AccountingModule";
 import { Header } from "@/components/Header";
 
 const Index = () => {
@@ -31,7 +32,7 @@ const Index = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Hash className="w-4 h-4" />
               Dashboard
@@ -55,6 +56,10 @@ const Index = () => {
             <TabsTrigger value="invoicing" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Faturação
+            </TabsTrigger>
+            <TabsTrigger value="accounting" className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Contabilidade
             </TabsTrigger>
           </TabsList>
 
@@ -80,6 +85,10 @@ const Index = () => {
 
           <TabsContent value="invoicing" className="space-y-6">
             <InvoicingModule />
+          </TabsContent>
+
+          <TabsContent value="accounting" className="space-y-6">
+            <AccountingModule />
           </TabsContent>
         </Tabs>
       </div>

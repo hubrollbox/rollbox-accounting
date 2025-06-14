@@ -9,6 +9,240 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accounting_periods: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          company_id: string | null
+          created_at: string
+          end_date: string
+          id: string
+          is_open: boolean | null
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          end_date: string
+          id?: string
+          is_open?: boolean | null
+          name: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_open?: boolean | null
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_periods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_requests: {
+        Row: {
+          approved_at: string | null
+          approver_id: string | null
+          comments: string | null
+          created_at: string
+          id: string
+          requester_id: string | null
+          rule_id: string | null
+          status: Database["public"]["Enums"]["approval_status"] | null
+          transaction_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id?: string | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          requester_id?: string | null
+          rule_id?: string | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          transaction_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          requester_id?: string | null
+          rule_id?: string | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          transaction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "approval_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_rules: {
+        Row: {
+          account_types: string[] | null
+          approver_id: string | null
+          company_id: string | null
+          condition: Database["public"]["Enums"]["approval_condition"]
+          created_at: string
+          id: string
+          is_active: boolean | null
+          min_amount: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          account_types?: string[] | null
+          approver_id?: string | null
+          company_id?: string | null
+          condition: Database["public"]["Enums"]["approval_condition"]
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          min_amount?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          account_types?: string[] | null
+          approver_id?: string | null
+          company_id?: string | null
+          condition?: Database["public"]["Enums"]["approval_condition"]
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          min_amount?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          device_info: string | null
+          entity: string
+          entity_id: string
+          id: string
+          ip_address: unknown | null
+          new_value: Json
+          old_value: Json | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          device_info?: string | null
+          entity: string
+          entity_id: string
+          id?: string
+          ip_address?: unknown | null
+          new_value: Json
+          old_value?: Json | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          device_info?: string | null
+          entity?: string
+          entity_id?: string
+          id?: string
+          ip_address?: unknown | null
+          new_value?: Json
+          old_value?: Json | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      chart_of_accounts: {
+        Row: {
+          account_type: string
+          code: string
+          company_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type: string
+          code: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -66,12 +300,15 @@ export type Database = {
           created_at: string
           default_tax_rate: number | null
           email: string | null
+          fiscal_year_start_month: number | null
           id: string
           invoice_prefix: string | null
           logo_url: string | null
+          max_entry_value: number | null
           next_invoice_number: number | null
           phone: string | null
           postal_code: string | null
+          require_approval_above: number | null
           tax_number: string | null
           updated_at: string
           user_id: string
@@ -85,12 +322,15 @@ export type Database = {
           created_at?: string
           default_tax_rate?: number | null
           email?: string | null
+          fiscal_year_start_month?: number | null
           id?: string
           invoice_prefix?: string | null
           logo_url?: string | null
+          max_entry_value?: number | null
           next_invoice_number?: number | null
           phone?: string | null
           postal_code?: string | null
+          require_approval_above?: number | null
           tax_number?: string | null
           updated_at?: string
           user_id: string
@@ -104,12 +344,15 @@ export type Database = {
           created_at?: string
           default_tax_rate?: number | null
           email?: string | null
+          fiscal_year_start_month?: number | null
           id?: string
           invoice_prefix?: string | null
           logo_url?: string | null
+          max_entry_value?: number | null
           next_invoice_number?: number | null
           phone?: string | null
           postal_code?: string | null
+          require_approval_above?: number | null
           tax_number?: string | null
           updated_at?: string
           user_id?: string
@@ -229,6 +472,107 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          accounting_date: string
+          company_id: string | null
+          created_at: string
+          description: string
+          entry_number: string
+          id: string
+          posted_at: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          accounting_date: string
+          company_id?: string | null
+          created_at?: string
+          description: string
+          entry_number: string
+          id?: string
+          posted_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          total_amount: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          accounting_date?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string
+          entry_number?: string
+          id?: string
+          posted_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_lines: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string | null
+          id: string
+          journal_entry_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -449,9 +793,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_balance_sheet: {
+        Args: { company_id_param: string; report_date: string }
+        Returns: {
+          account_code: string
+          account_name: string
+          account_type: string
+          balance: number
+        }[]
+      }
     }
     Enums: {
+      approval_condition: "AMOUNT" | "ACCOUNT_TYPE" | "MANUAL"
+      approval_status: "PENDING" | "APPROVED" | "REJECTED"
       document_type: "invoice" | "receipt" | "credit_note" | "debit_note"
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
       payment_method: "transfer" | "cash" | "card" | "check" | "other"
@@ -570,6 +924,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      approval_condition: ["AMOUNT", "ACCOUNT_TYPE", "MANUAL"],
+      approval_status: ["PENDING", "APPROVED", "REJECTED"],
       document_type: ["invoice", "receipt", "credit_note", "debit_note"],
       invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
       payment_method: ["transfer", "cash", "card", "check", "other"],

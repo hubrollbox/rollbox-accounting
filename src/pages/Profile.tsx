@@ -1,121 +1,155 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Header } from "@/components/Header";
-import { IntegrationsModule } from "@/components/IntegrationsModule";
-import { User, Building, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { User, Settings, Shield, LogOut, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReportsModule } from "@/components/ReportsModule";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Sessão terminada",
+      description: "Até à próxima!",
+    });
+    navigate("/auth");
+  };
+
+  const profileStats = [
+    { label: "Faturas Emitidas", value: "89", color: "text-blue-600" },
+    { label: "Clientes Ativos", value: "23", color: "text-green-600" },
+    { label: "Produtos", value: "45", color: "text-purple-600" },
+    { label: "Valor Total", value: "€12,450", color: "text-orange-600" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Perfil e Configurações
           </h1>
           <p className="text-muted-foreground">
-            Gerir o seu perfil e configurações da aplicação
+            Gerir informações pessoais, configurações e relatórios
           </p>
         </div>
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Perfil Pessoal
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          <Card className="lg:col-span-1">
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-10 h-10 text-primary-foreground" />
+              </div>
+              <CardTitle>{user?.email}</CardTitle>
+              <CardDescription>
+                Administrador do Sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Status:</span>
+                <Badge variant="default">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Ativo
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Plano:</span>
+                <Badge variant="secondary">Professional</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Último Acesso:</span>
+                <span className="text-sm text-muted-foreground">Agora</span>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                className="w-full"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Terminar Sessão
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {profileStats.map((stat, index) => (
+              <Card key={index}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${stat.color}`}>
+                    {stat.value}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Tabs defaultValue="reports" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Relatórios
             </TabsTrigger>
-            <TabsTrigger value="company" className="flex items-center gap-2">
-              <Building className="w-4 h-4" />
-              Empresa
-            </TabsTrigger>
-            <TabsTrigger value="integrations" className="flex items-center gap-2">
+            <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
-              Integrações
+              Configurações
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Segurança
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-6">
+          <TabsContent value="reports" className="space-y-6">
+            <ReportsModule />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Informações Pessoais</CardTitle>
+                <CardTitle>Configurações da Empresa</CardTitle>
                 <CardDescription>
-                  Atualize as suas informações pessoais
+                  Configurações gerais do sistema
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
-                    <Input id="name" placeholder="Seu nome completo" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={user?.email || ""} disabled />
-                  </div>
+              <CardContent>
+                <div className="text-center py-20 text-muted-foreground">
+                  <Settings className="w-12 h-12 mx-auto mb-4" />
+                  <p>Módulo de Configurações</p>
+                  <p className="text-sm">Em desenvolvimento</p>
                 </div>
-                <Button>Guardar Alterações</Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="company" className="space-y-6">
+          <TabsContent value="security" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Dados da Empresa</CardTitle>
+                <CardTitle>Configurações de Segurança</CardTitle>
                 <CardDescription>
-                  Configure os dados da sua empresa para as faturas
+                  Gestão de permissões e auditoria
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="company_name">Nome da Empresa</Label>
-                    <Input id="company_name" placeholder="Nome da empresa" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tax_number">Número de Contribuinte</Label>
-                    <Input id="tax_number" placeholder="NIF da empresa" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_email">Email da Empresa</Label>
-                    <Input id="company_email" type="email" placeholder="geral@empresa.pt" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_phone">Telefone</Label>
-                    <Input id="company_phone" placeholder="210 123 456" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Morada</Label>
-                    <Input id="address" placeholder="Rua, número" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="postal_code">Código Postal</Label>
-                    <Input id="postal_code" placeholder="1000-000" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Cidade</Label>
-                    <Input id="city" placeholder="Lisboa" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
-                    <Input id="country" placeholder="Portugal" defaultValue="Portugal" />
-                  </div>
+              <CardContent>
+                <div className="text-center py-20 text-muted-foreground">
+                  <Shield className="w-12 h-12 mx-auto mb-4" />
+                  <p>Módulo de Segurança</p>
+                  <p className="text-sm">Configurações avançadas de segurança</p>
                 </div>
-                <Button>Guardar Configurações</Button>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="integrations" className="space-y-6">
-            <IntegrationsModule />
           </TabsContent>
         </Tabs>
       </div>

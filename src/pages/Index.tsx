@@ -1,3 +1,8 @@
+declare global {
+  interface Window {
+    __lovableSidebarTrigger__?: () => void;
+  }
+}
 
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";

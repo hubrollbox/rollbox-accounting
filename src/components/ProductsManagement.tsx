@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Euro, Search, Plus, Hash } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DOMPurify from "dompurify";
 
 export const ProductsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +60,96 @@ export const ProductsManagement = () => {
     product.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const ProductCreationForm = () => {
+    const [form, setForm] = useState({
+      code: "",
+      name: "",
+      category: "",
+      price: "",
+      taxRate: "",
+    });
+    const [submitting, setSubmitting] = useState(false);
+
+    const sanitize = (value: string) => DOMPurify.sanitize(value.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setForm({ ...form, [e.target.id || e.target.name]: e.target.value });
+    };
+
+    const handleCategory = (value: string) => {
+      setForm({ ...form, category: value });
+    };
+    const handleTaxRate = (value: string) => {
+      setForm({ ...form, taxRate: value });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      setSubmitting(true);
+      // Sanitize data
+      const sanitized = {
+        code: sanitize(form.code),
+        name: sanitize(form.name),
+        category: sanitize(form.category),
+        price: sanitize(form.price),
+        taxRate: sanitize(form.taxRate),
+      };
+      // Here you would usually submit to your backend
+      // For demo: log sanitized product
+      console.log("Sanitized Product:", sanitized);
+      setSubmitting(false);
+      // Optionally, clear form/close dialog, toast etc.
+    };
+
+    return (
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div>
+          <Label htmlFor="code">Código</Label>
+          <Input id="code" value={form.code} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="name">Nome</Label>
+          <Input id="name" value={form.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="category">Categoria</Label>
+          <Select onValueChange={handleCategory} value={form.category}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecionar categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Serviços">Serviços</SelectItem>
+              <SelectItem value="Software">Software</SelectItem>
+              <SelectItem value="Hardware">Hardware</SelectItem>
+              <SelectItem value="Formação">Formação</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="price">Preço (€)</Label>
+          <Input id="price" type="number" step="0.01" value={form.price} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="taxRate">Taxa IVA (%)</Label>
+          <Select onValueChange={handleTaxRate} value={form.taxRate}>
+            <SelectTrigger>
+              <SelectValue placeholder="Taxa IVA" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="23">23% - Taxa Normal</SelectItem>
+              <SelectItem value="13">13% - Taxa Intermédia</SelectItem>
+              <SelectItem value="6">6% - Taxa Reduzida</SelectItem>
+              <SelectItem value="0">0% - Isento</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button className="w-full" type="submit" disabled={submitting}>
+          {submitting ? "A criar..." : "Criar Artigo"}
+        </Button>
+      </form>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -87,49 +177,7 @@ export const ProductsManagement = () => {
                 Introduza os dados do artigo/serviço
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="productCode">Código</Label>
-                <Input id="productCode" placeholder="PROD005" />
-              </div>
-              <div>
-                <Label htmlFor="productName">Nome</Label>
-                <Input id="productName" placeholder="Nome do produto/serviço" />
-              </div>
-              <div>
-                <Label htmlFor="category">Categoria</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecionar categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="services">Serviços</SelectItem>
-                    <SelectItem value="software">Software</SelectItem>
-                    <SelectItem value="hardware">Hardware</SelectItem>
-                    <SelectItem value="training">Formação</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="price">Preço (€)</Label>
-                <Input id="price" type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div>
-                <Label htmlFor="taxRate">Taxa IVA (%)</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Taxa IVA" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="23">23% - Taxa Normal</SelectItem>
-                    <SelectItem value="13">13% - Taxa Intermédia</SelectItem>
-                    <SelectItem value="6">6% - Taxa Reduzida</SelectItem>
-                    <SelectItem value="0">0% - Isento</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button className="w-full">Criar Artigo</Button>
-            </div>
+            <ProductCreationForm />
           </DialogContent>
         </Dialog>
       </div>

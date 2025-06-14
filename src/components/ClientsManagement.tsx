@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Users, Search, Plus, Euro } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DOMPurify from "dompurify";
 
 export const ClientsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +50,69 @@ export const ClientsManagement = () => {
     client.nif.includes(searchTerm)
   );
 
+  const ClientCreationForm = () => {
+    const [form, setForm] = useState({
+      name: "",
+      nif: "",
+      email: "",
+      phone: "",
+      creditLimit: "",
+    });
+    const [submitting, setSubmitting] = useState(false);
+
+    const sanitize = (value: string) => DOMPurify.sanitize(value.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm({ ...form, [e.target.id]: e.target.value });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      setSubmitting(true);
+      // Sanitize all input fields before usage
+      const sanitized = {
+        name: sanitize(form.name),
+        nif: sanitize(form.nif.replace(/\D/g, "")),
+        email: sanitize(form.email),
+        phone: sanitize(form.phone),
+        creditLimit: sanitize(form.creditLimit),
+      };
+      // Here you would usually submit to your backend
+      // For demo purposes, just log the sanitized object
+      console.log("Sanitized Client:", sanitized);
+      setSubmitting(false);
+      // Optionally, clear form or close dialog, and show a toast
+    };
+
+    return (
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div>
+          <Label htmlFor="name">Nome/Razão Social</Label>
+          <Input id="name" value={form.name} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="nif">NIF</Label>
+          <Input id="nif" value={form.nif.replace(/\D/g, "")} onChange={handleChange} minLength={9} maxLength={9} required />
+        </div>
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" value={form.email} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="phone">Telefone</Label>
+          <Input id="phone" value={form.phone} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="creditLimit">Limite de Crédito (€)</Label>
+          <Input id="creditLimit" type="number" value={form.creditLimit} onChange={handleChange} />
+        </div>
+        <Button className="w-full" type="submit" disabled={submitting}>
+          {submitting ? "A criar..." : "Criar Cliente"}
+        </Button>
+      </form>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -77,29 +140,7 @@ export const ClientsManagement = () => {
                 Introduza os dados do cliente
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="clientName">Nome/Razão Social</Label>
-                <Input id="clientName" placeholder="Nome do cliente" />
-              </div>
-              <div>
-                <Label htmlFor="nif">NIF</Label>
-                <Input id="nif" placeholder="123456789" />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="cliente@email.pt" />
-              </div>
-              <div>
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" placeholder="+351 912 345 678" />
-              </div>
-              <div>
-                <Label htmlFor="creditLimit">Limite de Crédito (€)</Label>
-                <Input id="creditLimit" type="number" placeholder="5000" />
-              </div>
-              <Button className="w-full">Criar Cliente</Button>
-            </div>
+            <ClientCreationForm />
           </DialogContent>
         </Dialog>
       </div>

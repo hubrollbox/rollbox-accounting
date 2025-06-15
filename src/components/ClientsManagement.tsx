@@ -11,7 +11,6 @@ import DOMPurify from "dompurify";
 import { useClients } from "@/hooks/useClients";
 
 // Tipagem já definida no hook
-// export interface Client {...}
 
 export const ClientsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,13 +18,13 @@ export const ClientsManagement = () => {
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (client.nif ?? client.tax_number ?? "").includes(searchTerm)
+    (client.tax_number ?? "").includes(searchTerm)
   );
 
   const ClientCreationForm = () => {
     const [form, setForm] = useState({
       name: "",
-      nif: "",
+      tax_number: "",
       email: "",
       phone: "",
       creditLimit: "",
@@ -42,10 +41,10 @@ export const ClientsManagement = () => {
       e.preventDefault();
       setSubmitting(true);
 
-      // Constrói dados para o Supabase. No banco não existe creditLimit nem status
+      // creditLimit não existe na base por padrão
       const sanitized = {
         name: sanitize(form.name),
-        nif: sanitize(form.nif.replace(/\D/g, "")),
+        tax_number: sanitize(form.tax_number.replace(/\D/g, "")),
         email: sanitize(form.email),
         phone: sanitize(form.phone),
       };
@@ -58,7 +57,7 @@ export const ClientsManagement = () => {
           onSuccess: () => {
             setForm({
               name: "",
-              nif: "",
+              tax_number: "",
               email: "",
               phone: "",
               creditLimit: "",
@@ -76,8 +75,8 @@ export const ClientsManagement = () => {
           <Input id="name" value={form.name} onChange={handleChange} required disabled={submitting || createClient.isPending} />
         </div>
         <div>
-          <Label htmlFor="nif">NIF</Label>
-          <Input id="nif" value={form.nif.replace(/\D/g, "")} onChange={handleChange} minLength={9} maxLength={9} required disabled={submitting || createClient.isPending} />
+          <Label htmlFor="tax_number">NIF</Label>
+          <Input id="tax_number" value={form.tax_number.replace(/\D/g, "")} onChange={handleChange} minLength={9} maxLength={9} required disabled={submitting || createClient.isPending} />
         </div>
         <div>
           <Label htmlFor="email">Email</Label>
@@ -87,7 +86,6 @@ export const ClientsManagement = () => {
           <Label htmlFor="phone">Telefone</Label>
           <Input id="phone" value={form.phone} onChange={handleChange} disabled={submitting || createClient.isPending} />
         </div>
-        {/* creditLimit e status não estão no banco atual, se necessário depois cria campo */}
         <DialogFooter>
           <Button className="w-full" type="submit" disabled={submitting || createClient.isPending}>
             {submitting || createClient.isPending ? "A criar..." : "Criar Cliente"}
@@ -160,8 +158,8 @@ export const ClientsManagement = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">{client.name}</h3>
-                        {client.nif || client.tax_number ? (
-                          <Badge variant="secondary">NIF: {client.nif || client.tax_number}</Badge>
+                        {client.tax_number ? (
+                          <Badge variant="secondary">NIF: {client.tax_number}</Badge>
                         ) : null}
                         <Badge variant={client.is_active === false ? "secondary" : "default"}>
                           {client.is_active === false ? "Inativo" : "Ativo"}
@@ -183,7 +181,6 @@ export const ClientsManagement = () => {
                       <div className={`text-sm ${client.currentDebt > 0 ? 'text-orange-600' : 'text-green-600'}`}>
                         Dívida: €{client.currentDebt?.toLocaleString()}
                       </div> */}
-                      {/* Por ora, não exibimos essas infos pois não existem no banco */}
                     </div>
                     <div className="ml-4">
                       <Button variant="outline" size="sm">

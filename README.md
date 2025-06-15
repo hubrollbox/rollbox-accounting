@@ -1,58 +1,59 @@
+
 # Welcome to your Lovable project
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25
 
-## How can I edit this code?
+## Como posso editar o código deste projeto?
 
-There are several ways of editing your application.
+Existem várias formas de editar a sua aplicação.
 
-**Use Lovable**
+**Utilizar o Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) and start prompting.
+Basta visitar o [Lovable Project](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) e começar a dar instruções no chat.
 
-Changes made via Lovable will be committed automatically to this repo.
+As alterações feitas via Lovable serão automaticamente guardadas neste repositório.
 
-**Use your preferred IDE**
+**Utilizar o seu editor preferido**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Se pretender trabalhar localmente no seu editor, pode clonar este repositório e fazer push das alterações. As alterações também serão refletidas no Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+O único requisito é ter o Node.js & npm instalados - [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+Siga estes passos:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Passo 1: Clone o repositório usando o URL do projeto.
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Passo 2: Entre na diretoria do projeto.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Passo 3: Instale as dependências.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Passo 4: Arranque o servidor de desenvolvimento.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Editar ficheiros diretamente no GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Entre no(s) ficheiro(s) desejado(s).
+- Clique no botão "Edit" (ícone de lápis) no topo direito da vista do ficheiro.
+- Faça as alterações e faça commit.
 
-**Use GitHub Codespaces**
+**Utilizar GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Vá à página principal do repositório.
+- Clique em "Code" no topo direito.
+- Selecione o separador "Codespaces".
+- Clique em "New codespace" para lançar um Codespace.
+- Edite diretamente no Codespace e faça commit das alterações.
 
-## What technologies are used for this project?
+## Que tecnologias são usadas neste projeto?
 
-This project is built with:
+Este projeto foi criado com:
 
 - Vite
 - TypeScript
@@ -60,14 +61,19 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Onde encontro as FAQs?
 
-Simply open [Lovable](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) and click on Share -> Publish.
+As **FAQs** estão disponíveis diretamente na página de autenticação ([/auth](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25/auth)), numa tab própria, para facilitar o acesso a utilizadores não autenticados.
 
-## Can I connect a custom domain to my Lovable project?
+## Como posso publicar este projeto?
 
-Yes, you can!
+Abra o [Lovable](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) e clique em Partilhar -> Publicar.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Posso ligar um domínio personalizado ao meu projeto Lovable?
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Sim!
+
+Para ligar um domínio, vá a Project > Settings > Domains e clique em Connect Domain.
+
+Consulte mais detalhes aqui: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+

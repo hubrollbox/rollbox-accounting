@@ -415,6 +415,7 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          digital_signature: string | null
           document_type: Database["public"]["Enums"]["document_type"] | null
           due_date: string | null
           id: string
@@ -423,6 +424,7 @@ export type Database = {
           notes: string | null
           payment_date: string | null
           payment_method: Database["public"]["Enums"]["payment_method"] | null
+          previous_hash: string | null
           status: Database["public"]["Enums"]["invoice_status"] | null
           subtotal: number
           tax_amount: number
@@ -433,6 +435,7 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
+          digital_signature?: string | null
           document_type?: Database["public"]["Enums"]["document_type"] | null
           due_date?: string | null
           id?: string
@@ -441,6 +444,7 @@ export type Database = {
           notes?: string | null
           payment_date?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          previous_hash?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
           subtotal?: number
           tax_amount?: number
@@ -451,6 +455,7 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
+          digital_signature?: string | null
           document_type?: Database["public"]["Enums"]["document_type"] | null
           due_date?: string | null
           id?: string
@@ -459,6 +464,7 @@ export type Database = {
           notes?: string | null
           payment_date?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          previous_hash?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
           subtotal?: number
           tax_amount?: number

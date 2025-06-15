@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -77,12 +76,62 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-2">
-                <TabsTrigger value="login" className="py-2">Login</TabsTrigger>
-                <TabsTrigger value="register" className="py-2">Registar</TabsTrigger>
-                <TabsTrigger value="integrate" className="py-2">Integrar</TabsTrigger>
-                <TabsTrigger value="faqs" className="py-2">FAQs</TabsTrigger>
-              </TabsList>
+              <div className="w-full overflow-x-auto scrollbar-none">
+                <TabsList
+                  className="
+                    grid grid-cols-4 mb-2 
+                    min-w-[440px] sm:min-w-0
+                    whitespace-nowrap 
+                    gap-0 rounded-md p-0
+                    bg-muted
+                    shadow-inner
+                  "
+                  style={{
+                    WebkitOverflowScrolling: "touch"
+                  }}
+                >
+                  <TabsTrigger
+                    value="login"
+                    className="
+                      py-3 sm:py-2 px-0 sm:px-3 text-base
+                      min-w-[100px] flex-1
+                      focus:z-10
+                    "
+                  >
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="register"
+                    className="
+                      py-3 sm:py-2 px-0 sm:px-3 text-base
+                      min-w-[100px] flex-1
+                      focus:z-10
+                    "
+                  >
+                    Registar
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="integrate"
+                    className="
+                      py-3 sm:py-2 px-0 sm:px-3 text-base
+                      min-w-[110px] flex-1
+                      focus:z-10
+                    "
+                  >
+                    Integrar
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="faqs"
+                    className="
+                      py-3 sm:py-2 px-0 sm:px-3 text-base
+                      min-w-[90px] flex-1
+                      focus:z-10
+                    "
+                  >
+                    FAQs
+                  </TabsTrigger>
+                </TabsList>
+              </div>
               <TabsContent value="login">
                 <AuthLoginForm
                   setLoading={setLoading}

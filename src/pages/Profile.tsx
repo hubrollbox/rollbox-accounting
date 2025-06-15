@@ -1,41 +1,22 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { User, Settings, Shield, LogOut, FileText, ArrowLeft } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReportsModule } from "@/components/ReportsModule";
-import { AuditTrail } from "@/components/AuditTrail";
-import { IntegrationsModule } from "@/components/IntegrationsModule";
-import { FaqSection } from "@/components/FaqSection";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { User, FileText, Settings, Shield } from "lucide-react";
+import { ProfileTabPerfil } from "@/components/profile/ProfileTabPerfil";
+import { ProfileTabRelatorios } from "@/components/profile/ProfileTabRelatorios";
+import { ProfileTabConfiguracoes } from "@/components/profile/ProfileTabConfiguracoes";
+import { ProfileTabSeguranca } from "@/components/profile/ProfileTabSeguranca";
+import { ProfileTabIntegracoes } from "@/components/profile/ProfileTabIntegracoes";
+import { ProfileTabFaqs } from "@/components/profile/ProfileTabFaqs";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast({
-      title: "Sessão terminada",
-      description: "Até à próxima!",
-    });
-    navigate("/auth");
-  };
 
   const handleBackToDashboard = () => {
     navigate("/");
   };
-
-  const profileStats = [
-    { label: "Faturas Emitidas", value: "89", color: "text-blue-600" },
-    { label: "Clientes Ativos", value: "23", color: "text-green-600" },
-    { label: "Produtos", value: "45", color: "text-purple-600" },
-    { label: "Valor Total", value: "€12,450", color: "text-orange-600" },
-  ];
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-6 bg-background min-h-screen">
@@ -86,110 +67,23 @@ const Profile = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* PERFIL */}
-        <TabsContent value="perfil" className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* USER CARD */}
-            <Card className="col-span-1 flex flex-col justify-between animate-fade-in">
-              <CardHeader className="text-center pb-2">
-                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="w-10 h-10 text-primary-foreground" />
-                </div>
-                <CardTitle className="break-words">{user?.email}</CardTitle>
-                <CardDescription>Administrador do Sistema</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Status:</span>
-                  <Badge variant="default">
-                    <Shield className="w-3 h-3 mr-1" />
-                    Ativo
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Plano:</span>
-                  <Badge variant="secondary">Professional</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Último Acesso:</span>
-                  <span className="text-sm text-muted-foreground">Agora</span>
-                </div>
-                <Button 
-                  variant="outline"
-                  onClick={handleSignOut}
-                  className="w-full mt-2"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Terminar Sessão
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* STATS */}
-            <div className="col-span-2 grid grid-cols-2 md:grid-cols-2 gap-4 content-between">
-              {profileStats.map((stat, index) => (
-                <Card key={index} className="animate-fade-in">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-medium uppercase tracking-wide">{stat.label}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-2xl font-bold ${stat.color}`}>
-                      {stat.value}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+        <TabsContent value="perfil">
+          <ProfileTabPerfil />
         </TabsContent>
-
-        {/* RELATÓRIOS */}
-        <TabsContent value="relatorios" className="space-y-6 animate-fade-in">
-          <ReportsModule />
+        <TabsContent value="relatorios">
+          <ProfileTabRelatorios />
         </TabsContent>
-
-        {/* CONFIGURAÇÕES */}
-        <TabsContent value="configuracoes" className="space-y-4 animate-fade-in">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações da Empresa</CardTitle>
-              <CardDescription>
-                Configurações gerais do sistema (em desenvolvimento)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-10 text-center py-8 text-muted-foreground">
-                <Settings className="w-12 h-12 mx-auto mb-4" />
-                <p>Módulo de Configurações</p>
-                <p className="text-sm">Em desenvolvimento</p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="configuracoes">
+          <ProfileTabConfiguracoes />
         </TabsContent>
-
-        {/* SEGURANÇA */}
-        <TabsContent value="seguranca" className="space-y-4 animate-fade-in">
-          <AuditTrail />
+        <TabsContent value="seguranca">
+          <ProfileTabSeguranca />
         </TabsContent>
-
-        {/* INTEGRAÇÕES */}
-        <TabsContent value="integracoes" className="space-y-4 animate-fade-in">
-          <IntegrationsModule />
+        <TabsContent value="integracoes">
+          <ProfileTabIntegracoes />
         </TabsContent>
-
-        {/* FAQS */}
-        <TabsContent value="faqs" className="space-y-4 animate-fade-in">
-          <Card>
-            <CardHeader>
-              <CardTitle>Perguntas Frequentes (FAQs)</CardTitle>
-              <CardDescription>
-                Dúvidas comuns sobre o sistema e integrações
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FaqSection />
-            </CardContent>
-          </Card>
+        <TabsContent value="faqs">
+          <ProfileTabFaqs />
         </TabsContent>
       </Tabs>
     </div>

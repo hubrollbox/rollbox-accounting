@@ -5,7 +5,7 @@
  */
 
 import { serve } from "std/server";
-import { createClient } from "supabase";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { xml2js, js2xml } from "npm:xml-js";
 
 // SAF-T header params (ajuste conforme necessário)

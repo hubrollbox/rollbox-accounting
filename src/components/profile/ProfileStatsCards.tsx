@@ -9,7 +9,7 @@ const profileStats = [
 ];
 
 export const ProfileStatsCards = () => (
-  <div className="col-span-2 grid grid-cols-2 md:grid-cols-2 gap-4 content-between">
+  <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 md:col-span-2">
     {profileStats.map((stat, index) => (
       <Card key={index} className="animate-fade-in">
         <CardHeader className="pb-2">

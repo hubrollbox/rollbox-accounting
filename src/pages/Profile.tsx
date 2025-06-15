@@ -59,7 +59,7 @@ const Profile = () => {
           <TabsList className="flex flex-wrap gap-1 px-2 py-0.5 bg-muted rounded-lg mb-4">
             <TabsTrigger value="perfil" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Perfil
+              Configurações
             </TabsTrigger>
             <TabsTrigger value="relatorios" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -107,3 +107,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

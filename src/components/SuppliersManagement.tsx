@@ -16,23 +16,14 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useSuppliers } from "@/hooks/useSuppliers";
 
 export const SuppliersManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
 
-  // Mock data - será substituído por dados reais do Supabase
-  const suppliers = [
-    {
-      id: "1",
-      name: "Fornecedor Exemplo Lda",
-      email: "geral@fornecedor.pt",
-      phone: "210 123 456",
-      tax_number: "123456789",
-      city: "Lisboa",
-      is_active: true,
-    },
-  ];
+  // Busca fornecedores em Supabase
+  const { data: suppliers = [], isLoading, error, createSupplier } = useSuppliers();
 
   // Estado para novo fornecedor
   const [newSupplier, setNewSupplier] = useState({
@@ -53,17 +44,36 @@ export const SuppliersManagement = () => {
 
   const handleCreateSupplier = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui será adicionada integração com Supabase futuramente
-    setOpen(false);
-    setNewSupplier({
-      name: "",
-      email: "",
-      phone: "",
-      tax_number: "",
-      city: "",
-    });
-    // Exibe toast se desejar!
+    createSupplier.mutate(
+      {
+        name: newSupplier.name,
+        email: newSupplier.email,
+        phone: newSupplier.phone,
+        tax_number: newSupplier.tax_number,
+        city: newSupplier.city,
+        // outros campos são opcionais e preenchidos pelo backend
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          setNewSupplier({
+            name: "",
+            email: "",
+            phone: "",
+            tax_number: "",
+            city: "",
+          });
+        },
+      }
+    );
+    // O toast será disparado pelo próprio hook em caso de sucesso/erro
   };
+
+  // Filtro simples pelo nome/cidade
+  const filteredSuppliers = suppliers.filter((supplier: any) =>
+    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (supplier.city && supplier.city.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6">
@@ -98,6 +108,7 @@ export const SuppliersManagement = () => {
                   value={newSupplier.name}
                   onChange={handleInputChange}
                   autoFocus
+                  disabled={createSupplier.isLoading}
                 />
               </div>
               <div>
@@ -108,6 +119,7 @@ export const SuppliersManagement = () => {
                   type="email"
                   value={newSupplier.email}
                   onChange={handleInputChange}
+                  disabled={createSupplier.isLoading}
                 />
               </div>
               <div>
@@ -117,6 +129,7 @@ export const SuppliersManagement = () => {
                   name="phone"
                   value={newSupplier.phone}
                   onChange={handleInputChange}
+                  disabled={createSupplier.isLoading}
                 />
               </div>
               <div>
@@ -126,6 +139,7 @@ export const SuppliersManagement = () => {
                   name="tax_number"
                   value={newSupplier.tax_number}
                   onChange={handleInputChange}
+                  disabled={createSupplier.isLoading}
                 />
               </div>
               <div>
@@ -135,10 +149,13 @@ export const SuppliersManagement = () => {
                   name="city"
                   value={newSupplier.city}
                   onChange={handleInputChange}
+                  disabled={createSupplier.isLoading}
                 />
               </div>
               <DialogFooter>
-                <Button type="submit">Salvar</Button>
+                <Button type="submit" disabled={createSupplier.isLoading}>
+                  {createSupplier.isLoading ? "Salvando..." : "Salvar"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -162,48 +179,54 @@ export const SuppliersManagement = () => {
               className="max-w-sm"
             />
           </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>NIF</TableHead>
-                <TableHead>Cidade</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {suppliers.map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell className="font-medium">{supplier.name}</TableCell>
-                  <TableCell>{supplier.email}</TableCell>
-                  <TableCell>{supplier.phone}</TableCell>
-                  <TableCell>{supplier.tax_number}</TableCell>
-                  <TableCell>{supplier.city}</TableCell>
-                  <TableCell>
-                    <Badge variant={supplier.is_active ? "default" : "secondary"}>
-                      {supplier.is_active ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {isLoading ? (
+            <div className="py-10 text-center text-muted-foreground">Carregando...</div>
+          ) : error ? (
+            <div className="py-10 text-center text-destructive">Erro ao carregar fornecedores</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>NIF</TableHead>
+                  <TableHead>Cidade</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredSuppliers.map((supplier: any) => (
+                  <TableRow key={supplier.id}>
+                    <TableCell className="font-medium">{supplier.name}</TableCell>
+                    <TableCell>{supplier.email}</TableCell>
+                    <TableCell>{supplier.phone}</TableCell>
+                    <TableCell>{supplier.tax_number}</TableCell>
+                    <TableCell>{supplier.city}</TableCell>
+                    <TableCell>
+                      <Badge variant={supplier.is_active ? "default" : "secondary"}>
+                        {supplier.is_active ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 };
+

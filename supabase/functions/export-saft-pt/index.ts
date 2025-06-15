@@ -1,4 +1,3 @@
-
 /**
  * Supabase Edge Function: export-saft-pt
  * Gera o ficheiro SAF-T(PT) XML com base nos dados das tabelas de faturação, clientes e produtos.
@@ -7,7 +6,7 @@
 
 import { serve } from "std/server";
 import { createClient } from "supabase";
-import { xml2js, js2xml } from "xml-js";
+import { xml2js, js2xml } from "npm:xml-js";
 
 // SAF-T header params (ajuste conforme necessário)
 const headerStatic = {

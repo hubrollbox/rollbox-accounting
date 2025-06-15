@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -159,38 +158,43 @@ const Auth = () => {
                   </TabsTrigger>
                 </TabsList>
               </div>
-              <TabsContent value="login">
-                <AuthLoginForm
-                  setLoading={setLoading}
-                  loading={loading}
-                  email={loginEmail}
-                  setEmail={handleLoginEmailChange}
-                  password={loginPassword}
-                  setPassword={setLoginPassword}
-                />
-              </TabsContent>
-              <TabsContent value="register">
-                <AuthRegisterForm
-                  setLoading={setLoading}
-                  loading={loading}
-                  email={registerEmail}
-                  setEmail={handleRegisterEmailChange}
-                  password={registerPassword}
-                  setPassword={setRegisterPassword}
-                  name={registerName}
-                  setName={handleRegisterNameChange}
-                  nif={registerNif}
-                  setNif={handleRegisterNifChange}
-                />
-              </TabsContent>
-              <TabsContent value="integrate">
-                <AuthIntegrateTab />
-              </TabsContent>
-              <TabsContent value="faqs">
-                <div className="py-2">
-                  <FaqSection />
-                </div>
-              </TabsContent>
+              <div
+                className="relative w-full"
+                style={{ minHeight: 320, maxHeight: 400, overflowY: "auto" }}
+              >
+                <TabsContent value="login">
+                  <AuthLoginForm
+                    setLoading={setLoading}
+                    loading={loading}
+                    email={loginEmail}
+                    setEmail={handleLoginEmailChange}
+                    password={loginPassword}
+                    setPassword={setLoginPassword}
+                  />
+                </TabsContent>
+                <TabsContent value="register">
+                  <AuthRegisterForm
+                    setLoading={setLoading}
+                    loading={loading}
+                    email={registerEmail}
+                    setEmail={handleRegisterEmailChange}
+                    password={registerPassword}
+                    setPassword={setRegisterPassword}
+                    name={registerName}
+                    setName={handleRegisterNameChange}
+                    nif={registerNif}
+                    setNif={handleRegisterNifChange}
+                  />
+                </TabsContent>
+                <TabsContent value="integrate">
+                  <AuthIntegrateTab />
+                </TabsContent>
+                <TabsContent value="faqs">
+                  <div className="py-2">
+                    <FaqSection />
+                  </div>
+                </TabsContent>
+              </div>
             </Tabs>
           </CardContent>
         </Card>

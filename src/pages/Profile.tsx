@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsModule } from "@/components/ReportsModule";
 import { AuditTrail } from "@/components/AuditTrail";
 import { IntegrationsModule } from "@/components/IntegrationsModule";
+import { FaqSection } from "@/components/FaqSection";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -159,9 +161,14 @@ const Profile = () => {
             <AuditTrail />
           </TabsContent>
         </Tabs>
+        {/* NOVA SEÇÃO DE FAQ */}
+        <div className="my-10">
+          <FaqSection />
+        </div>
       </div>
     </div>
   );
 };
 
 export default Profile;
+

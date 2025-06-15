@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Euro, LogOut, User } from "lucide-react";
@@ -42,14 +41,13 @@ export const Header = () => {
               Conforme AT
             </Badge>
           </div>
-          
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">
               {user?.email}
             </span>
             <Button variant="outline" size="sm" onClick={handleProfileClick}>
               <User className="w-4 h-4 mr-2" />
-              Perfil
+              Configurações
             </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />

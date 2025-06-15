@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -14,6 +15,7 @@ import { AuthLoginForm } from "@/components/auth/AuthLoginForm";
 import { AuthRegisterForm } from "@/components/auth/AuthRegisterForm";
 import { AuthIntegrateTab } from "@/components/auth/AuthIntegrateTab";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
+import { FaqSection } from "@/components/FaqSection";
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
@@ -75,10 +77,11 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-2">
+              <TabsList className="grid w-full grid-cols-4 mb-2">
                 <TabsTrigger value="login" className="py-2">Login</TabsTrigger>
                 <TabsTrigger value="register" className="py-2">Registar</TabsTrigger>
                 <TabsTrigger value="integrate" className="py-2">Integrar</TabsTrigger>
+                <TabsTrigger value="faqs" className="py-2">FAQs</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
                 <AuthLoginForm
@@ -106,6 +109,11 @@ const Auth = () => {
               </TabsContent>
               <TabsContent value="integrate">
                 <AuthIntegrateTab />
+              </TabsContent>
+              <TabsContent value="faqs">
+                <div className="py-2">
+                  <FaqSection />
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>

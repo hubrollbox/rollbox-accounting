@@ -6,33 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Package, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { useStock } from "@/hooks/useStock";
 
 export const StockManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: stockItems = [], isLoading, error } = useStock();
 
-  // Mock data - será substituído por dados reais do Supabase
-  const stockItems = [
-    {
-      id: "1",
-      product_name: "Produto Exemplo",
-      quantity: 45,
-      min_quantity: 10,
-      max_quantity: 100,
-      location: "A1-B2",
-      unit: "un",
-    },
-    {
-      id: "2",
-      product_name: "Serviço Consultoria",
-      quantity: 0,
-      min_quantity: 0,
-      max_quantity: null,
-      location: "N/A",
-      unit: "h",
-    },
-  ];
-
-  const getStockStatus = (quantity: number, minQuantity: number) => {
+  const getStockStatus = (quantity: number, minQuantity: number = 0) => {
     if (quantity <= minQuantity) return "low";
     if (quantity <= minQuantity * 2) return "medium";
     return "good";
@@ -48,6 +28,11 @@ export const StockManagement = () => {
         return <Badge variant="default">Stock OK</Badge>;
     }
   };
+
+  const filteredStock = stockItems.filter(item =>
+    (item.product_id || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.location || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -92,7 +77,7 @@ export const StockManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {stockItems.filter(item => getStockStatus(item.quantity, item.min_quantity) === "low").length}
+              {stockItems.filter(item => getStockStatus(item.quantity, item.min_quantity ?? 0) === "low").length}
             </div>
           </CardContent>
         </Card>
@@ -119,40 +104,47 @@ export const StockManagement = () => {
           <div className="flex items-center space-x-2 mb-4">
             <Search className="w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Pesquisar produtos..."
+              placeholder="Pesquisar (ID produto, localização...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
           </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Unidade</TableHead>
-                <TableHead>Stock Mín.</TableHead>
-                <TableHead>Localização</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stockItems.map((item) => {
-                const status = getStockStatus(item.quantity, item.min_quantity);
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.product_name}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell>{item.min_quantity}</TableCell>
-                    <TableCell>{item.location}</TableCell>
-                    <TableCell>{getStockBadge(status)}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          {isLoading ? (
+            <div className="py-10 text-center text-muted-foreground">Carregando...</div>
+          ) : error ? (
+            <div className="py-10 text-center text-destructive">Erro ao carregar stock</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Quantidade</TableHead>
+                  <TableHead>Unidade</TableHead>
+                  <TableHead>Stock Mín.</TableHead>
+                  <TableHead>Localização</TableHead>
+                  <TableHead>Estado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredStock.map((item) => {
+                  const status = getStockStatus(item.quantity, item.min_quantity ?? 0);
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        {item.product_id /* Trocar para nome quando disponível */}
+                      </TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{item.unit}</TableCell>
+                      <TableCell>{item.min_quantity ?? 0}</TableCell>
+                      <TableCell>{item.location}</TableCell>
+                      <TableCell>{getStockBadge(status)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

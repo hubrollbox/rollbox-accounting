@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 
 // Ajuste o tipo document_type para corresponder ao enum do Supabase
 type DocumentType = "invoice" | "receipt" | "credit_note" | "debit_note";
-type InvoiceStatus = "draft" | "pending" | "paid" | "cancelled";
+// Corrigido o InvoiceStatus para os valores válidos do Supabase
+type InvoiceStatus = "draft" | "sent" | "paid" | "overdue" | "cancelled";
 
 // Ajuste ao interface de Invoice para usar os tipos corretos
 interface Invoice {
@@ -44,11 +45,29 @@ export function useInvoices() {
   });
 
   const createInvoice = useMutation({
-    // Remove "id" e "user_id" do payload para compatibilidade com Supabase typing
     mutationFn: async (invoice: Omit<Invoice, "id" | "user_id">) => {
+      // Remove status se não for um valor permitido (por segurança)
+      const allowedStatus: InvoiceStatus[] = [
+        "draft",
+        "sent",
+        "paid",
+        "overdue",
+        "cancelled"
+      ];
+      const status =
+        invoice.status && allowedStatus.includes(invoice.status)
+          ? invoice.status
+          : undefined;
+      // Montar o payload apenas com campos válidos
+      const payload: any = {
+        ...invoice,
+        status,
+        user_id: user?.id,
+      };
+
       const { data, error } = await supabase
         .from("invoices")
-        .insert({ ...invoice, user_id: user?.id })
+        .insert(payload)
         .select("*")
         .single();
       if (error) throw error;
@@ -59,8 +78,12 @@ export function useInvoices() {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
     onError: (error: any) => {
-      toast({ title: "Erro ao criar fatura", description: error.message, variant: "destructive" });
-    }
+      toast({
+        title: "Erro ao criar fatura",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   return { ...query, createInvoice };

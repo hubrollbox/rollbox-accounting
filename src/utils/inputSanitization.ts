@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
  * Sanitiza entrada de texto removendo tags HTML e scripts maliciosos
  */
 export const sanitizeText = (input: string): string => {
-  return DOMPurify.sanitize(input.trim(), { 
+  return DOMPurify.sanitize((input || "").trim(), { 
     ALLOWED_TAGS: [], 
     ALLOWED_ATTR: [] 
   });

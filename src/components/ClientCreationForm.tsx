@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
 import DOMPurify from "dompurify";
 import { UseMutateFunction } from "@tanstack/react-query";
+import { sanitizeAndValidateNIF, sanitizeEmail, sanitizeText, limitInputLength } from "@/utils/inputSanitization";
 
 interface ClientCreationFormProps {
   createClient: {
@@ -22,37 +22,46 @@ export const ClientCreationForm = ({ createClient }: ClientCreationFormProps) =>
     phone: "",
   });
   const [submitting, setSubmitting] = useState(false);
-
-  const sanitize = (value: string) =>
-    DOMPurify.sanitize(value.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  const [nifError, setNifError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.id]: e.target.value });
+    if (e.target.id === "tax_number") setNifError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
-    const sanitized = {
-      name: sanitize(form.name),
-      tax_number: sanitize(form.tax_number.replace(/\D/g, "")),
-      email: sanitize(form.email),
-      phone: sanitize(form.phone),
-    };
+    // Hardening: sanitize & validate all fields
+    const sanitizedName = limitInputLength(sanitizeText(form.name), 80);
+    const sanitizedPhone = limitInputLength(sanitizeText(form.phone), 24);
+    const sanitizedEmail = sanitizeEmail(form.email);
+
+    const { value: sanitizedNif, isValid: nifIsValid } = sanitizeAndValidateNIF(form.tax_number);
+    if (!nifIsValid) {
+      setNifError("NIF inválido. Deve conter 9 dígitos e passar o controlo de validade português.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!sanitizedEmail) {
+      setSubmitting(false);
+      alert("Por favor insira um email válido.");
+      return;
+    }
+
     createClient.mutate(
       {
-        ...sanitized,
+        name: sanitizedName,
+        tax_number: sanitizedNif,
+        email: sanitizedEmail,
+        phone: sanitizedPhone,
         is_active: true,
       },
       {
         onSuccess: () => {
-          setForm({
-            name: "",
-            tax_number: "",
-            email: "",
-            phone: "",
-          });
+          setForm({ name: "", tax_number: "", email: "", phone: "" });
         },
         onSettled: () => setSubmitting(false),
       }
@@ -68,6 +77,7 @@ export const ClientCreationForm = ({ createClient }: ClientCreationFormProps) =>
           value={form.name}
           onChange={handleChange}
           required
+          maxLength={80}
           disabled={submitting || createClient.isPending}
         />
       </div>
@@ -81,7 +91,9 @@ export const ClientCreationForm = ({ createClient }: ClientCreationFormProps) =>
           maxLength={9}
           required
           disabled={submitting || createClient.isPending}
+          pattern="\d{9}"
         />
+        {nifError && <span className="text-destructive text-xs">{nifError}</span>}
       </div>
       <div>
         <Label htmlFor="email">Email</Label>
@@ -91,6 +103,7 @@ export const ClientCreationForm = ({ createClient }: ClientCreationFormProps) =>
           value={form.email}
           onChange={handleChange}
           required
+          maxLength={80}
           disabled={submitting || createClient.isPending}
         />
       </div>
@@ -100,6 +113,7 @@ export const ClientCreationForm = ({ createClient }: ClientCreationFormProps) =>
           id="phone"
           value={form.phone}
           onChange={handleChange}
+          maxLength={24}
           disabled={submitting || createClient.isPending}
         />
       </div>

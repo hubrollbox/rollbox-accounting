@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 export interface Client {
   id: string;
   name: string;
-  nif?: string;
+  tax_number?: string; // <-- Use tax_number per Supabase schema
   email?: string;
   phone?: string;
   address?: string;

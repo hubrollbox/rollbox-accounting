@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { AuthLoginForm } from "@/components/auth/AuthLoginForm";
 import { AuthRegisterForm } from "@/components/auth/AuthRegisterForm";
+import { AuthIntegrateTab } from "@/components/auth/AuthIntegrateTab";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -74,9 +75,10 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-2">
+              <TabsList className="grid w-full grid-cols-3 mb-2">
                 <TabsTrigger value="login" className="py-2">Login</TabsTrigger>
                 <TabsTrigger value="register" className="py-2">Registar</TabsTrigger>
+                <TabsTrigger value="integrate" className="py-2">Integrar</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
                 <AuthLoginForm
@@ -101,6 +103,9 @@ const Auth = () => {
                   nif={registerNif}
                   setNif={setRegisterNif}
                 />
+              </TabsContent>
+              <TabsContent value="integrate">
+                <AuthIntegrateTab />
               </TabsContent>
             </Tabs>
           </CardContent>

@@ -13,7 +13,7 @@ export const ClientsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data: clients = [], isLoading, error, createClient } = useClients();
 
-  // Use client.tax_number in the filter (not nif)
+  // Filtering uses client.tax_number per Supabase schema
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.tax_number ?? "").includes(searchTerm)

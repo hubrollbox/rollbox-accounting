@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Tabs,
@@ -83,7 +82,7 @@ const Terms = () => (
               </li>
             </ul>
             <div className="mt-3 text-xs text-muted-foreground">
-              Esclareça qualquer questão de privacidade ou exerça os seus direitos através do email: <span className="underline">suporte@exemplo.pt</span>
+              Esclareça qualquer questão de privacidade ou exerça os seus direitos através do email: <span className="underline">suporte@legalflux.pt</span>
             </div>
           </div>
         </TabsContent>
@@ -129,7 +128,7 @@ const Terms = () => (
               </li>
             </ul>
             <div className="mt-3 text-xs text-muted-foreground">
-              Email de contacto: <span className="underline">suporte@exemplo.pt</span>
+              Email de contacto: <span className="underline">suporte@legalflux.pt</span>
             </div>
           </div>
         </TabsContent>

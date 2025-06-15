@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -16,7 +17,8 @@ import { AuthIntegrateTab } from "@/components/auth/AuthIntegrateTab";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 import { FaqSection } from "@/components/FaqSection";
 
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+// Reduzido para 15 minutos para dados financeiros sensíveis
+const SESSION_TIMEOUT = 15 * 60 * 1000;
 
 const Auth = () => {
   // Estados separados para login
@@ -35,31 +37,56 @@ const Auth = () => {
 
   useRedirectIfAuthenticated();
 
-  // Session timeout and automatic signout
+  // Input sanitization function
+  const sanitizeInput = (input: string): string => {
+    return DOMPurify.sanitize(input.trim(), { 
+      ALLOWED_TAGS: [], 
+      ALLOWED_ATTR: [] 
+    });
+  };
+
+  // Enhanced session timeout with security logging
   useEffect(() => {
     const resetInactivityTimeout = () => {
       if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
       inactivityTimeoutRef.current = setTimeout(() => {
+        console.log('Sessão terminada por inatividade - logout automático');
         signOut();
         toast({
           title: "Sessão terminada por inatividade",
-          description: "Por segurança, foi efetuado logout automático após 30 minutos sem atividade.",
+          description: "Por segurança, foi efetuado logout automático após 15 minutos sem atividade.",
           variant: "destructive",
         });
         navigate("/auth");
       }, SESSION_TIMEOUT);
     };
 
-    const activityEvents = ["mousemove", "keydown", "click"];
-    activityEvents.forEach((event) => window.addEventListener(event, resetInactivityTimeout));
+    const activityEvents = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    activityEvents.forEach((event) => window.addEventListener(event, resetInactivityTimeout, { passive: true }));
     resetInactivityTimeout();
 
     return () => {
       if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
       activityEvents.forEach((event) => window.removeEventListener(event, resetInactivityTimeout));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signOut, toast, navigate]);
+
+  // Sanitize inputs on change
+  const handleLoginEmailChange = (value: string) => {
+    setLoginEmail(sanitizeInput(value));
+  };
+
+  const handleRegisterEmailChange = (value: string) => {
+    setRegisterEmail(sanitizeInput(value));
+  };
+
+  const handleRegisterNameChange = (value: string) => {
+    setRegisterName(sanitizeInput(value));
+  };
+
+  const handleRegisterNifChange = (value: string) => {
+    setRegisterNif(sanitizeInput(value));
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-2 py-6 md:p-4">
@@ -137,7 +164,7 @@ const Auth = () => {
                   setLoading={setLoading}
                   loading={loading}
                   email={loginEmail}
-                  setEmail={setLoginEmail}
+                  setEmail={handleLoginEmailChange}
                   password={loginPassword}
                   setPassword={setLoginPassword}
                 />
@@ -147,13 +174,13 @@ const Auth = () => {
                   setLoading={setLoading}
                   loading={loading}
                   email={registerEmail}
-                  setEmail={setRegisterEmail}
+                  setEmail={handleRegisterEmailChange}
                   password={registerPassword}
                   setPassword={setRegisterPassword}
                   name={registerName}
-                  setName={setRegisterName}
+                  setName={handleRegisterNameChange}
                   nif={registerNif}
-                  setNif={setRegisterNif}
+                  setNif={handleRegisterNifChange}
                 />
               </TabsContent>
               <TabsContent value="integrate">

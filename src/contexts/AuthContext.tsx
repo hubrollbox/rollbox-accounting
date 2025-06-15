@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,47 +25,77 @@ export const useAuth = () => {
   return context;
 };
 
+// Session timeout: 15 minutes for financial data security
+const SESSION_TIMEOUT = 15 * 60 * 1000;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionTimeoutId, setSessionTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
-  const updateAuthState = async (session: Session | null) => {
+  const clearSessionTimeout = () => {
+    if (sessionTimeoutId) {
+      clearTimeout(sessionTimeoutId);
+      setSessionTimeoutId(null);
+    }
+  };
+
+  const setupSessionTimeout = () => {
+    clearSessionTimeout();
+    const timeoutId = setTimeout(() => {
+      console.log('Session timeout - signing out user');
+      signOut();
+    }, SESSION_TIMEOUT);
+    setSessionTimeoutId(timeoutId);
+  };
+
+  const updateAuthState = (session: Session | null) => {
     try {
       if (session?.user) {
-        const secureSession = await authService.getSecureSession();
+        setUser(session.user);
+        setSession(session);
+        setupSessionTimeout();
         
-        if (secureSession) {
-          setUser(secureSession.user);
-          setSession(secureSession.session);
-          setCompanyId(secureSession.company_id || null);
-        } else {
-          setUser(null);
-          setSession(null);
-          setCompanyId(null);
-        }
+        // Defer company ID fetch to avoid blocking auth state update
+        setTimeout(() => {
+          fetchCompanyId(session.user.id);
+        }, 0);
       } else {
         setUser(null);
         setSession(null);
         setCompanyId(null);
+        clearSessionTimeout();
       }
     } catch (error) {
       console.error('Erro ao atualizar estado de autenticação:', error);
       setUser(null);
       setSession(null);
       setCompanyId(null);
+      clearSessionTimeout();
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchCompanyId = async (userId: string) => {
+    try {
+      const secureSession = await authService.getSecureSession();
+      if (secureSession?.company_id) {
+        setCompanyId(secureSession.company_id);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar company_id:', error);
+    }
+  };
+
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener - avoid async calls in callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event);
-        await updateAuthState(session);
+        updateAuthState(session);
       }
     );
 
@@ -72,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        await updateAuthState(session);
+        updateAuthState(session);
       } catch (error) {
         console.error('Erro ao inicializar autenticação:', error);
         setLoading(false);
@@ -81,7 +112,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearSessionTimeout();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -104,7 +138,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const redirectUrl = `${window.location.origin}/`;
 
-      // envia name e nif como user_metadata
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -127,6 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
+      clearSessionTimeout();
       await authService.secureSignOut();
     } catch (error) {
       console.error('Erro no logout:', error);
@@ -138,6 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshSession = async () => {
     try {
       await authService.refreshSession();
+      setupSessionTimeout(); // Reset timeout on refresh
     } catch (error) {
       console.error('Erro ao renovar sessão:', error);
     }

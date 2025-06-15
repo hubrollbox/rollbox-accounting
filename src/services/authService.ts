@@ -40,12 +40,18 @@ export const authService = {
         throw new AuthError('INVALID_SESSION', 'Sessão inválida');
       }
 
+      // Verificar se a sessão não expirou
+      const now = Math.floor(Date.now() / 1000);
+      if (data.session.expires_at && data.session.expires_at < now) {
+        throw new AuthError('SESSION_EXPIRED', 'Sessão expirada');
+      }
+
       // Buscar informações adicionais do usuário de forma segura
       const { data: profile, error: profileError } = await supabase
         .from('company_settings')
         .select('id, company_name')
         .eq('user_id', user.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError && profileError.code !== 'PGRST116') {
         console.warn('Erro ao buscar perfil do usuário:', profileError);
@@ -110,24 +116,68 @@ export const authService = {
   },
 
   /**
-   * Logout seguro
+   * Logout seguro com limpeza completa
    */
   async secureSignOut(): Promise<void> {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Log de segurança
+      console.log('Iniciando logout seguro...');
+      
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error('Erro no logout:', error);
-        // Mesmo com erro, limpar dados locais
       }
 
       // Limpar qualquer cache ou dados sensíveis
       localStorage.removeItem('supabase.auth.token');
       sessionStorage.clear();
       
+      // Limpar cache do navegador relacionado à autenticação
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            if (name.includes('auth') || name.includes('session')) {
+              caches.delete(name);
+            }
+          });
+        });
+      }
+      
     } catch (error) {
       console.error('Erro durante logout seguro:', error);
+      // Mesmo com erro, limpar dados locais
+      localStorage.clear();
+      sessionStorage.clear();
       throw error;
+    }
+  },
+
+  /**
+   * Detecta atividade suspeita na sessão
+   */
+  async detectSuspiciousActivity(): Promise<boolean> {
+    try {
+      const session = await this.getSecureSession();
+      if (!session) return false;
+
+      // Verificar múltiplas sessões simultâneas (implementação básica)
+      const lastActivity = localStorage.getItem('last_activity');
+      const currentTime = Date.now();
+      
+      if (lastActivity) {
+        const timeDiff = currentTime - parseInt(lastActivity);
+        // Se a última atividade foi há mais de 8 horas, pode ser suspeito
+        if (timeDiff > 8 * 60 * 60 * 1000) {
+          return true;
+        }
+      }
+      
+      localStorage.setItem('last_activity', currentTime.toString());
+      return false;
+    } catch (error) {
+      console.error('Erro ao detectar atividade suspeita:', error);
+      return true; // Em caso de erro, assume atividade suspeita
     }
   }
 };

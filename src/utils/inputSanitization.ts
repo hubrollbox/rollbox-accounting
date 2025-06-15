@@ -71,5 +71,5 @@ export const sanitizeNumeric = (input: string, allowDecimals: boolean = true): s
 export const sanitizeForDatabase = (input: string): string => {
   const sanitized = sanitizeText(input);
   // Remove caracteres que podem ser usados para SQL injection
-  return sanitized.replace(/['";\\--]/g, '');
+  return sanitized.replace(/['";\\-]/g, '');
 };

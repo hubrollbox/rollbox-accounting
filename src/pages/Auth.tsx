@@ -159,8 +159,7 @@ const Auth = () => {
                 </TabsList>
               </div>
               <div
-                className="relative w-full"
-                style={{ minHeight: 320, maxHeight: 400, overflowY: "auto" }}
+                className="relative w-full min-h-[330px] max-h-[420px] h-[350px] overflow-y-auto"
               >
                 <TabsContent value="login">
                   <AuthLoginForm

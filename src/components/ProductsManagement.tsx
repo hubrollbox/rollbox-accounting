@@ -1,63 +1,37 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Euro, Search, Plus, Hash } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DOMPurify from "dompurify";
+import { useProducts } from "@/hooks/useProducts";
+
+// Tipagem dos produtos de useProducts
+type Product = {
+  id: string;
+  code?: string;
+  name: string;
+  category?: string;
+  price: number;
+  tax_rate: number;
+  stock?: number | null;
+  unit?: string;
+  description?: string;
+  is_active?: boolean;
+};
 
 export const ProductsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  
-  const products = [
-    {
-      id: 1,
-      code: "PROD001",
-      name: "Consultoria Informática",
-      category: "Serviços",
-      price: 75.00,
-      stock: null,
-      taxRate: 23,
-      unit: "Hora"
-    },
-    {
-      id: 2,
-      code: "PROD002", 
-      name: "Licença Software Anual",
-      category: "Software",
-      price: 299.99,
-      stock: 50,
-      taxRate: 23,
-      unit: "Unidade"
-    },
-    {
-      id: 3,
-      code: "PROD003",
-      name: "Formação Presencial",
-      category: "Formação",
-      price: 150.00,
-      stock: null,
-      taxRate: 6,
-      unit: "Dia"
-    },
-    {
-      id: 4,
-      code: "PROD004",
-      name: "Equipamento Informático",
-      category: "Hardware",
-      price: 850.00,
-      stock: 12,
-      taxRate: 23,
-      unit: "Unidade"
-    }
-  ];
+  const { data: products = [], isLoading, error, createProduct } = useProducts();
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.code.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const ProductCreationForm = () => {
@@ -66,54 +40,67 @@ export const ProductsManagement = () => {
       name: "",
       category: "",
       price: "",
-      taxRate: "",
+      tax_rate: "",
+      unit: "",
+      description: "",
     });
     const [submitting, setSubmitting] = useState(false);
 
     const sanitize = (value: string) => DOMPurify.sanitize(value.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setForm({ ...form, [e.target.id || e.target.name]: e.target.value });
+      setForm({ ...form, [e.target.name || e.target.id]: e.target.value });
     };
 
     const handleCategory = (value: string) => {
       setForm({ ...form, category: value });
     };
     const handleTaxRate = (value: string) => {
-      setForm({ ...form, taxRate: value });
+      setForm({ ...form, tax_rate: value });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       setSubmitting(true);
-      // Sanitize data
+      // Sanitize data e envia para o Supabase
       const sanitized = {
         code: sanitize(form.code),
         name: sanitize(form.name),
         category: sanitize(form.category),
-        price: sanitize(form.price),
-        taxRate: sanitize(form.taxRate),
+        price: parseFloat(sanitize(form.price.replace(",", "."))) || 0,
+        tax_rate: parseFloat(sanitize(form.tax_rate.replace(",", "."))) || 0,
+        unit: sanitize(form.unit),
+        description: sanitize(form.description),
       };
-      // Here you would usually submit to your backend
-      // For demo: log sanitized product
-      console.log("Sanitized Product:", sanitized);
-      setSubmitting(false);
-      // Optionally, clear form/close dialog, toast etc.
+      createProduct.mutate(sanitized, {
+        onSuccess: () => {
+          setForm({
+            code: "",
+            name: "",
+            category: "",
+            price: "",
+            tax_rate: "",
+            unit: "",
+            description: "",
+          });
+        },
+        onSettled: () => setSubmitting(false)
+      });
     };
 
     return (
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
           <Label htmlFor="code">Código</Label>
-          <Input id="code" value={form.code} onChange={handleChange} required />
+          <Input id="code" name="code" value={form.code} onChange={handleChange} required disabled={submitting || createProduct.isPending}/>
         </div>
         <div>
           <Label htmlFor="name">Nome</Label>
-          <Input id="name" value={form.name} onChange={handleChange} required />
+          <Input id="name" name="name" value={form.name} onChange={handleChange} required disabled={submitting || createProduct.isPending}/>
         </div>
         <div>
           <Label htmlFor="category">Categoria</Label>
-          <Select onValueChange={handleCategory} value={form.category}>
+          <Select onValueChange={handleCategory} value={form.category} disabled={submitting || createProduct.isPending}>
             <SelectTrigger>
               <SelectValue placeholder="Selecionar categoria" />
             </SelectTrigger>
@@ -127,11 +114,11 @@ export const ProductsManagement = () => {
         </div>
         <div>
           <Label htmlFor="price">Preço (€)</Label>
-          <Input id="price" type="number" step="0.01" value={form.price} onChange={handleChange} required />
+          <Input id="price" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required disabled={submitting || createProduct.isPending}/>
         </div>
         <div>
-          <Label htmlFor="taxRate">Taxa IVA (%)</Label>
-          <Select onValueChange={handleTaxRate} value={form.taxRate}>
+          <Label htmlFor="tax_rate">Taxa IVA (%)</Label>
+          <Select onValueChange={handleTaxRate} value={form.tax_rate} disabled={submitting || createProduct.isPending}>
             <SelectTrigger>
               <SelectValue placeholder="Taxa IVA" />
             </SelectTrigger>
@@ -143,9 +130,19 @@ export const ProductsManagement = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full" type="submit" disabled={submitting}>
-          {submitting ? "A criar..." : "Criar Artigo"}
-        </Button>
+        <div>
+          <Label htmlFor="unit">Unidade</Label>
+          <Input id="unit" name="unit" value={form.unit} onChange={handleChange} disabled={submitting || createProduct.isPending}/>
+        </div>
+        <div>
+          <Label htmlFor="description">Descrição</Label>
+          <Input id="description" name="description" value={form.description} onChange={handleChange} disabled={submitting || createProduct.isPending}/>
+        </div>
+        <DialogFooter>
+          <Button className="w-full" type="submit" disabled={submitting || createProduct.isPending}>
+            {submitting || createProduct.isPending ? "A criar..." : "Criar Artigo"}
+          </Button>
+        </DialogFooter>
       </form>
     );
   };
@@ -203,50 +200,59 @@ export const ProductsManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <Badge variant="outline">
-                        <Hash className="w-3 h-3 mr-1" />
-                        {product.code}
-                      </Badge>
-                      <Badge variant="secondary">{product.category}</Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>Unidade: {product.unit}</span>
-                      {product.stock !== null && (
-                        <span className={product.stock < 10 ? "text-orange-600" : ""}>
-                          Stock: {product.stock}
-                        </span>
+          {isLoading ? (
+            <div className="py-10 text-center text-muted-foreground">Carregando...</div>
+          ) : error ? (
+            <div className="py-10 text-center text-destructive">Erro ao carregar artigos</div>
+          ) : (
+            <div className="space-y-4">
+              {filteredProducts.map((product: Product) => (
+                <div key={product.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold">{product.name}</h3>
+                        <Badge variant="outline">
+                          <Hash className="w-3 h-3 mr-1" />
+                          {product.code}
+                        </Badge>
+                        <Badge variant="secondary">{product.category}</Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>Unidade: {product.unit}</span>
+                        {"stock" in product && product.stock !== null && (
+                          <span className={product.stock !== undefined && product.stock < 10 ? "text-orange-600" : ""}>
+                            Stock: {product.stock}
+                          </span>
+                        )}
+                      </div>
+                      {product.description && (
+                        <div className="text-xs text-muted-foreground mt-1">{product.description}</div>
                       )}
                     </div>
-                  </div>
-                  
-                  <div className="text-right space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Euro className="w-4 h-4" />
-                      <span className="text-lg font-medium">
-                        €{product.price.toFixed(2)}
-                      </span>
+                    
+                    <div className="text-right space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Euro className="w-4 h-4" />
+                        <span className="text-lg font-medium">
+                          €{product.price?.toFixed(2) ?? "0.00"}
+                        </span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        IVA: {product.tax_rate}%
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      IVA: {product.taxRate}%
+                    
+                    <div className="ml-4">
+                      <Button variant="outline" size="sm">
+                        Editar
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="ml-4">
-                    <Button variant="outline" size="sm">
-                      Editar
-                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

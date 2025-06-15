@@ -1,79 +1,135 @@
+# 🧾 Accounting
 
-# Welcome to your Lovable project
+**Modern accounting SaaS built with cutting-edge stack for SMBs**  
+[![Next.js](https://img.shields.io/badge/Next.js-13.5+-000?logo=next.js)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)](https://supabase.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://rollbox-accounting.vercel.app)
 
-## Project info
+<div align="center">
+  <img src="https://github.com/hubrollbox/rollbox-accounting/assets/your-account/dashboard-preview.png" width="80%" alt="Dashboard Preview">
+</div>
 
-**URL**: https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25
+## ✨ Features
 
-## Como posso editar o código deste projeto?
+- **Real-time financial tracking**
+- Automated invoice generation
+- Multi-company support
+- Role-based access control
+- Responsive mobile UI
+- Secure end-to-end encryption
 
-Existem várias formas de editar a sua aplicação.
+## 🚀 Tech Stack
 
-**Utilizar o Lovable**
+| Layer               | Technology                           |
+|---------------------|--------------------------------------|
+| **Frontend**        | Next.js 14 (App Router)              |
+| **Styling**         | Tailwind CSS + Shadcn UI             |
+| **State Management**| Zustand                              |
+| **Backend**         | Supabase (PostgreSQL + Auth)         |
+| **Forms**           | React Hook Form + Zod validation     |
+| **Deployment**      | Vercel + Lovable.dev (previews)      |
 
-Basta visitar o [Lovable Project](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) e começar a dar instruções no chat.
+## ⚙️ Setup Local Development
 
-As alterações feitas via Lovable serão automaticamente guardadas neste repositório.
+### Prerequisites
+- Node.js 18+
+- PNPM 8.x
+- Supabase account
 
-**Utilizar o seu editor preferido**
+### Installation
+```bash
+# Clone repository
+git clone https://github.com/hubrollbox/rollbox-accounting.git
+cd rollbox-accounting
 
-Se pretender trabalhar localmente no seu editor, pode clonar este repositório e fazer push das alterações. As alterações também serão refletidas no Lovable.
+# Install dependencies
+pnpm install
 
-O único requisito é ter o Node.js & npm instalados - [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Siga estes passos:
-
-```sh
-# Passo 1: Clone o repositório usando o URL do projeto.
-git clone <YOUR_GIT_URL>
-
-# Passo 2: Entre na diretoria do projeto.
-cd <YOUR_PROJECT_NAME>
-
-# Passo 3: Instale as dependências.
-npm i
-
-# Passo 4: Arranque o servidor de desenvolvimento.
-npm run dev
+# Setup environment variables
+cp .env.example .env.local
 ```
 
-**Editar ficheiros diretamente no GitHub**
+### Configure Environment
+```env
+# .env.local
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
 
-- Entre no(s) ficheiro(s) desejado(s).
-- Clique no botão "Edit" (ícone de lápis) no topo direito da vista do ficheiro.
-- Faça as alterações e faça commit.
+### Run Development Server
+```bash
+pnpm dev
+```
+Open http://localhost:3000
 
-**Utilizar GitHub Codespaces**
+## 📦 Production Build
+```bash
+pnpm build
+pnpm start
+```
 
-- Vá à página principal do repositório.
-- Clique em "Code" no topo direito.
-- Selecione o separador "Codespaces".
-- Clique em "New codespace" para lançar um Codespace.
-- Edite diretamente no Codespace e faça commit das alterações.
+## 🔒 Supabase Configuration
+1. Create new project at [Supabase](https://supabase.com)
+2. Enable Row Level Security (RLS) for all tables
+3. Configure email templates in Auth settings
+4. Set up storage buckets for document uploads
 
-## Que tecnologias são usadas neste projeto?
+## 🌐 Deployment
 
-Este projeto foi criado com:
+### Vercel (Production)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhubrollbox%2Frollbox-accounting)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Lovable.dev (Previews)
+1. Connect GitHub repository
+2. Enable automatic previews for PRs
+3. Set environment variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-staging-supabase.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-staging-key
+   ```
 
-## Onde encontro as FAQs?
+## 🧪 Testing Strategy
+```mermaid
+graph LR
+    A[Local Testing] --> B[Lovable.dev Preview]
+    B --> C[Vercel Staging]
+    C --> D[Production]
+```
 
-As **FAQs** estão disponíveis diretamente na página de autenticação ([/auth](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25/auth)), numa tab própria, para facilitar o acesso a utilizadores não autenticados.
+### Manual Tests Required
+- **Authentication Flow**
+  - [ ] New user registration
+  - [ ] Password recovery
+  - [ ] Multi-device logout
+- **Data Integrity**
+  - [ ] Invoice number sequencing
+  - [ ] Financial report consistency
+- **Mobile UX**
+  - [ ] Form submissions on <400px screens
+  - [ ] Table scrolling experience
 
-## Como posso publicar este projeto?
+## 🛠 Troubleshooting
 
-Abra o [Lovable](https://lovable.dev/projects/b9c7c3ab-af78-4272-83ee-ba875fcb3e25) e clique em Partilhar -> Publicar.
+| Issue                          | Solution                          |
+|--------------------------------|-----------------------------------|
+| Auth redirect failures         | Check callback URLs in Supabase   |
+| Database connection errors     | Verify RLS policies              |
+| UI rendering issues            | Run `pnpm dlx shadcn-ui@latest init` |
+| Missing styles                | Purge Tailwind config            |
 
-## Posso ligar um domínio personalizado ao meu projeto Lovable?
+## 🤝 Contributing
 
-Sim!
+1. Fork the repository
+2. Create feature branch (`feat/your-feature`)
+3. Commit changes with semantic messages
+4. Open PR with detailed description
+5. Await Lovable.dev preview deployment
 
-Para ligar um domínio, vá a Project > Settings > Domains e clique em Connect Domain.
+```bash
+# Commit message format
+feat: add invoice export functionality
+fix(responsive): mobile table scrolling
+```
 
-Consulte mais detalhes aqui: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-
+## 📄 License
+MIT License - see [LICENSE](https://github.com/hubrollbox/rollbox-accounting/blob/main/LICENSE) for details

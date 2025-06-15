@@ -5,10 +5,21 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Terms = () => (
   <main className="w-full min-h-screen flex items-center justify-center bg-muted/30 py-6">
     <section className="w-full max-w-xl rounded-2xl shadow-lg border border-border bg-card px-2 sm:px-8 py-6 sm:py-10 animate-fade-in">
+      <div className="mb-2 flex items-center justify-start">
+        <Button asChild variant="ghost" size="sm" className="gap-1">
+          <Link to="/" aria-label="Voltar à página inicial">
+            <Home size={18} className="mr-1" />
+            <span className="hidden xs:inline">Início</span>
+          </Link>
+        </Button>
+      </div>
       <h1 className="text-2xl font-bold mb-2 text-center text-primary tracking-tight">
         Termos &amp; Condições
       </h1>

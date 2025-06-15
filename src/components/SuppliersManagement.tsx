@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -108,7 +107,7 @@ export const SuppliersManagement = () => {
                   value={newSupplier.name}
                   onChange={handleInputChange}
                   autoFocus
-                  disabled={createSupplier.isLoading}
+                  disabled={createSupplier.isPending}
                 />
               </div>
               <div>
@@ -119,7 +118,7 @@ export const SuppliersManagement = () => {
                   type="email"
                   value={newSupplier.email}
                   onChange={handleInputChange}
-                  disabled={createSupplier.isLoading}
+                  disabled={createSupplier.isPending}
                 />
               </div>
               <div>
@@ -129,7 +128,7 @@ export const SuppliersManagement = () => {
                   name="phone"
                   value={newSupplier.phone}
                   onChange={handleInputChange}
-                  disabled={createSupplier.isLoading}
+                  disabled={createSupplier.isPending}
                 />
               </div>
               <div>
@@ -139,7 +138,7 @@ export const SuppliersManagement = () => {
                   name="tax_number"
                   value={newSupplier.tax_number}
                   onChange={handleInputChange}
-                  disabled={createSupplier.isLoading}
+                  disabled={createSupplier.isPending}
                 />
               </div>
               <div>
@@ -149,12 +148,12 @@ export const SuppliersManagement = () => {
                   name="city"
                   value={newSupplier.city}
                   onChange={handleInputChange}
-                  disabled={createSupplier.isLoading}
+                  disabled={createSupplier.isPending}
                 />
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={createSupplier.isLoading}>
-                  {createSupplier.isLoading ? "Salvando..." : "Salvar"}
+                <Button type="submit" disabled={createSupplier.isPending}>
+                  {createSupplier.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </DialogFooter>
             </form>
@@ -229,4 +228,3 @@ export const SuppliersManagement = () => {
     </div>
   );
 };
-
